@@ -13,6 +13,8 @@ import java.io.PrintStream;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.topcoder.kafka.messaging.KafkaMessageProducer;
+import com.topcoder.kafka.messaging.MessageTemplate;
 import com.topcoder.management.phase.PhaseManagementException;
 import com.topcoder.management.phase.PhaseManager;
 import com.topcoder.management.phase.autopilot.AutoPilotResult;
@@ -465,10 +467,10 @@ public class DefaultProjectPilot implements ProjectPilot {
 
         // Start if the phase is scheduled and can start.
         try {
+            if (phase.getPhaseStatus().getName().equals(getScheduledStatusName())
+                && phaseManager.canStart(phase).isSuccess()) {
 //            if (phase.getPhaseStatus().getName().equals(getScheduledStatusName())
-//                && phaseManager.canStart(phase).isSuccess()) {
-        	if (phase.getPhaseStatus().getName().equals(getScheduledStatusName())
-                    && phaseManager.canStart(phase)) {
+//                    && phaseManager.canStart(phase)) {
                 phaseManager.start(phase, operator);
                 count[1]++;
                 doAudit(phase, false, operator);
@@ -512,16 +514,26 @@ public class DefaultProjectPilot implements ProjectPilot {
         MessageFormat message = new MessageFormat(new Date().toString(), phase.getProject().getId(), phase.getId(), (null == phase.getPhaseType()) ? "Null Phase Type" : phase.getPhaseType()
                     .getName(), isEnd ? "END" : "START", operator);
         //ObjectMapp
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        getLog().log(Level.ERROR,"JSON_MESSAGE :::" +gson.toJson(message));
+        Gson gson = new GsonBuilder().create();
+        String strMessage = gson.toJson(message);
+        
+        // pass raw msg to Kafka topic
+        KafkaMessageProducer producer = new KafkaMessageProducer();
+        producer.postRequestUsingGson(message);
+        
+        getLog().log(Level.INFO,"JSON_MESSAGE :::" + strMessage);
     }
     
     // TODO: Remove below code after testing is completed
     /*public static void main(String[] args) {
-    	
-    	MessageFormat message = new MessageFormat("2018, Jan 25", 11, 1032, "Null Phase Type"
-                , "END" , "operator 1");
-    	Gson gson = new GsonBuilder().setPrettyPrinting().create();
+    	MessageFormat message = new MessageFormat("Thu Feb 22 16:14:22 EST 2018", 
+    			30050490, 741615, "Registration"
+                , "END" , "22841596");
+    	Gson gson = new GsonBuilder().create();
         System.out.println(gson.toJson(message));
+    	
+        KafkaMessageProducer producer = new KafkaMessageProducer();
+        producer.postRequestUsingGson(gson.toJson(message));
+        
 	}*/
 }
