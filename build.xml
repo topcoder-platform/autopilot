@@ -82,6 +82,9 @@
     <path id="buildlibs">
         <path refid="component.tcs-dependencies"/>
         <path refid="component.3rdParty-dependencies"/>
+        <fileset dir="${basedir}">
+            <include name="lib/*.jar"/>
+        </fileset>
     </path>
 
     <!-- classes needed to compile the test code -->
