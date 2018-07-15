@@ -12,7 +12,7 @@
   <property name="database_abstraction.jar" value="${tcs_libdir}/database_abstraction/2.0.0/database_abstraction.jar"/>
   <property name="db_connection_factory.jar" value="${tcs_libdir}/db_connection_factory/1.1.1/db_connection_factory.jar"/>
   <property name="executable_wrapper.jar" value="${tcs_libdir}/executable_wrapper/1.0.0/executable_wrapper.jar"/>
-  <property name="id_generator.jar" value="${tcs_libdir}/id_generator/3.0.0/id_generator.jar"/>
+  <property name="id_generator.jar" value="${tcs_libdir}/id_generator/3.0.2/id_generator.jar"/>
   <property name="job_scheduling.jar" value="${tcs_libdir}/job_scheduler/1.0/job_scheduler.jar"/>
   <property name="logging_wrapper.jar" value="${tcs_libdir}/logging_wrapper/2.0.0/logging_wrapper.jar"/>
   <property name="object_factory_config_manager_plugin.jar" value="${tcs_libdir}/object_factory_config_manager_plugin/1.1.0/object_factory_config_manager_plugin.jar"/>
@@ -47,6 +47,7 @@
     <pathelement location="${typesafe_enum.jar}"/>
     <pathelement location="${workdays.jar}"/>
     <pathelement location="${object_factory_config_manager_plugin.jar}"/>
+	<pathelement location="${core.api.jar}" />
   </path>
   <path id="component.3rdParty-dependencies">
     <pathelement location="${xerces.jar}"/>
