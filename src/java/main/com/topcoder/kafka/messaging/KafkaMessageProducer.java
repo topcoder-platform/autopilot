@@ -18,6 +18,7 @@ import com.topcoder.management.phase.autopilot.impl.MessageFormat;
 import com.topcoder.util.log.Level;
 import com.topcoder.util.log.Log;
 import com.topcoder.util.log.LogManager;
+import com.appirio.tech.core.api.v3.util.jwt.JWTTokenGenerator;
 
 public class KafkaMessageProducer {
 
@@ -31,8 +32,12 @@ public class KafkaMessageProducer {
 
 	public String targetURL = "";
 	public String endPoint = "";
-	public String authToken = "";
 	public String topicName = "";
+	public String clientId = "";
+	public String clientSecret = "";
+	public String authAudience = "";
+	public String authDomain = "";
+	public int tokenExpirationTime = 60 * 24;
 
 	/**
 	 * <p>
@@ -41,6 +46,14 @@ public class KafkaMessageProducer {
 	 * </p>
 	 */
 	public static final String DEFAULT_LOG_NAME = "AutoPilot";
+	
+	/**
+	 * <p>
+	 * Represents the kafka config properties file location
+	 * ctor().
+	 * </p>
+	 */
+	public static final String fileLocation  = "/config/kafka-config.properties";
 	/**
 	 * <p>
 	 * Represents the log used to do auditing whenever a phase is started/ended.
@@ -57,12 +70,18 @@ public class KafkaMessageProducer {
 	 */
 	private void loadProperties() {
 		try {
-			prb = new PropertyResourceBundle(new FileInputStream(new File("config/kafka-config.properties")));
+			prb = new PropertyResourceBundle(this.getClass().getResourceAsStream(fileLocation));
 			targetURL = prb.getString("kafka.target.url");
 			endPoint = prb.getString("kafka.target.endpoint");
-			authToken = prb.getString("kafka.header.authtoken");
+			clientId = prb.getString("kafka.security.clientId");
+			clientSecret = prb.getString("kafka.security.clientsecret");
+			authDomain = prb.getString("kafka.security.authdomain");
+			authAudience = prb.getString("kafka.security.authAudience");
+			tokenExpirationTime = Integer.parseInt(prb.getString("kafka.security.tokenExpirationtime"));
 			topicName = prb.getString("kafka.topic");
-		} catch (Exception e) {
+		}catch(NumberFormatException e) {
+			tokenExpirationTime = 60 * 24;
+		}catch (Exception e) {
 			setLocalKafkaVariables();
 			getLog().log(Level.ERROR, "Exception in loading Kafka Properties : " + e.getMessage());
 			e.printStackTrace();
@@ -72,8 +91,12 @@ public class KafkaMessageProducer {
 	private void setLocalKafkaVariables() {
 		targetURL = "https://api.topcoder-dev.com/eventbus/events";
 //		endPoint = "/events";
-		authToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJjb3BpbG90IiwiYWFhIiwidGVzdFJvbGUiLCJ0b255X3Rlc3RfMSIsIlRvcGNvZGVyIFVzZXIiLCJhc2RkIiwiYWRtaW5pc3RyYXRvciJdLCJpc3MiOiJodHRwczovL2FwaS50b3Bjb2Rlci1kZXYuY29tIiwiaGFuZGxlIjoibXR3b21leSIsImV4cCI6MTUyMjExMTI2MywidXNlcklkIjoiNDAwMTYzNTYiLCJpYXQiOjE1MTcwMTM1NDgsImVtYWlsIjoibXR3b21leUB0b3Bjb2Rlci5jb20iLCJqdGkiOiJkYTRjMjU2Yy0wYzZkLTQxYmMtYTdjYy01NmYxOTkwYjE1YjAiLCJuYW1lIjoicHJvamVjdC1zZXJ2aWNlIn0.r3zMY2ntKezWt6xB8ENH7HM27N1oLwzZlLQNQ1Ek-10";
 		topicName = "notifications.kafka.queue.java.test";
+		clientId= "5fctfjaLJHdvM04kSrCcC8yn0I4t1JTd";
+		clientSecret = "GhvDENIrYXo-d8xQ10fxm9k7XSVg491vlpvolXyWNBmeBdhsA5BAq2mH4cAAYS0x";
+		authDomain = "topcoder-newauth.auth0.com";
+		authAudience = "https://www.topcoder.com";
+		
 	}
 
 	public KafkaMessageProducer() {
@@ -109,17 +132,27 @@ public class KafkaMessageProducer {
 
 		getLog().log(Level.INFO, "KAFKA_MESSAGE :::" + strMessage);
 
-		// POST Request from jersey REST Client
-		Response response = target.request(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + authToken)
+		try{
+		Response response = target.request(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + getM2MToken())
 				.post(Entity.entity(strMessage, MediaType.APPLICATION_JSON), Response.class);
 
 		getLog().log(Level.INFO, response);
+		}catch(Exception e){
+			getLog().log(Level.ERROR, "Exception in When sending message to Kakfa Bus : " + e.getMessage());
+			e.printStackTrace();
+		}
 		//getLog().log(Level.INFO, "KAFKA MESSAGE RES_CODE :::" + response.getStatus());
 
 	}
 
 	protected Log getLog() {
 		return log;
+	}
+	
+	public String getM2MToken() throws Exception {
+		 JWTTokenGenerator generator = JWTTokenGenerator.getInstance(this.clientId,
+	                this.clientSecret, this.authAudience,this.authDomain,this.tokenExpirationTime);
+	     return generator.getMachineToken();
 	}
 
 	/*public static void main(String[] args) {
