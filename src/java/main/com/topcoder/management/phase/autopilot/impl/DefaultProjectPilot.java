@@ -4,15 +4,16 @@
 
 package com.topcoder.management.phase.autopilot.impl;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.TimeZone;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
 import com.fasterxml.jackson.core.JsonFactory;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.topcoder.kafka.messaging.KafkaMessageProducer;
 import com.topcoder.kafka.messaging.MessageTemplate;
 import com.topcoder.management.phase.PhaseManagementException;
@@ -231,6 +232,7 @@ public class DefaultProjectPilot implements ProjectPilot {
         this.openStatusName = openStatusName;
         this.log = log;
 
+        getLog().log(Level.INFO, "created DefaultProjectPilot");
     }
 
     /**
@@ -448,13 +450,13 @@ public class DefaultProjectPilot implements ProjectPilot {
         try {
             if (phase.getPhaseStatus().getName().equals(getOpenStatusName())
                 && phaseManager.canEnd(phase).isSuccess()) {
-        	
+
         	// FIX: made by Badal on 17.JAN.18
-        	// canStart() & canEnd() method returns boolean itself 
-        	// and so isSuccess can't be invoked on it 
+        	// canStart() & canEnd() method returns boolean itself
+        	// and so isSuccess can't be invoked on it
 //        	if (phase.getPhaseStatus().getName().equals(getOpenStatusName())
 //                    && phaseManager.canEnd(phase)) {
-        		
+
                 phaseManager.end(phase, operator);
                 count[0]++;
                 doAudit(phase, true, operator);
@@ -510,30 +512,18 @@ public class DefaultProjectPilot implements ProjectPilot {
                 + " - phase type "
                 + ((null == phase.getPhaseType()) ? "Null Phase Type" : phase.getPhaseType()
                     .getName()) + " - " + (isEnd ? "END" : "START") + " - operator " + operator);
-        
-        MessageFormat message = new MessageFormat(new Date().toString(), phase.getProject().getId(), phase.getId(), (null == phase.getPhaseType()) ? "Null Phase Type" : phase.getPhaseType()
-                    .getName(), isEnd ? "END" : "START", operator);
-        //ObjectMapp
-        Gson gson = new GsonBuilder().create();
-        String strMessage = gson.toJson(message);
-        
+
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+        MessageFormat message = new MessageFormat(dateFormat.format(new Date()),
+          phase.getProject().getId(), phase.getId(),
+          (null == phase.getPhaseType()) ? "Null Phase Type" : phase.getPhaseType().getName(),
+          isEnd ? "END" : "START", operator);
+
+        getLog().log(Level.INFO, "JSON_MESSAGE ::: WILL SEND");
+
         // pass raw msg to Kafka topic
         KafkaMessageProducer producer = new KafkaMessageProducer();
         producer.postRequestUsingGson(message);
-        
-        getLog().log(Level.INFO,"JSON_MESSAGE :::" + strMessage);
     }
-    
-    // TODO: Remove below code after testing is completed
-    /*public static void main(String[] args) {
-    	MessageFormat message = new MessageFormat("Thu Feb 22 16:14:22 EST 2018", 
-    			30050490, 741615, "Registration"
-                , "END" , "22841596");
-    	Gson gson = new GsonBuilder().create();
-        System.out.println(gson.toJson(message));
-    	
-        KafkaMessageProducer producer = new KafkaMessageProducer();
-        producer.postRequestUsingGson(gson.toJson(message));
-        
-	}*/
 }

@@ -176,7 +176,7 @@ public class AutoPilotJob implements Runnable, Schedulable {
         }
 
         this.log = LogManager.getLog("AutoPilot");
-        
+
         log.log(Level.DEBUG,
         		"Create AutoPilotJob with namespace:" + namespace + " and autoPilotKey:" + autoPilotKey);
 
@@ -361,7 +361,7 @@ public class AutoPilotJob implements Runnable, Schedulable {
         PhaseOperationException {
         log.log(Level.INFO, new LogMessage(null, getOperator(), "AutoPilot iteration."));
         AutoPilotResult[] ret = autoPilot.advanceProjects(projectId, getOperator());
-        log.log(Level.DEBUG, new LogMessage(null, getOperator(), "AutoPilot job iteration - end."));
+        log.log(Level.DEBUG, new LogMessage(null, getOperator(), "AutoPilot iteration - end."));
         return ret;
     }
 
