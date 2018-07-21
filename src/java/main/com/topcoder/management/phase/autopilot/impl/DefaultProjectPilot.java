@@ -118,6 +118,13 @@ public class DefaultProjectPilot implements ProjectPilot {
 
     /**
      * <p>
+     * Represents kafka message producer.
+     * </p>
+     */
+    private final KafkaMessageProducer producer = new KafkaMessageProducer();
+
+    /**
+     * <p>
      * Constructs a new instance of DefaultProjectPilot class. This will initialize the phase
      * manager instance using object factory. The object factory is initialized with this class'
      * full name as its configuration namespace. Inside this namespace, a property with the key of
@@ -522,8 +529,6 @@ public class DefaultProjectPilot implements ProjectPilot {
 
         getLog().log(Level.INFO, "JSON_MESSAGE ::: WILL SEND");
 
-        // pass raw msg to Kafka topic
-        KafkaMessageProducer producer = new KafkaMessageProducer();
         producer.postRequestUsingGson(message);
     }
 }
