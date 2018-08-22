@@ -1,4 +1,0 @@
-To send Events from auto pilot to kafka topic, we are using eventBus API's event endpoint. There are few configurable parameters for Kafka communication which are available at config/kafka-config.properties file.
-
-Also there is dependencies added to buildBox server and also config change on software01 (deployment) server. Refer all xml files under this folder. Also make sure to keep this files updated for future references.
-
