@@ -1,0 +1,122 @@
+<CMConfig>
+    <Config name="com.cronos.termsofuse.dao.TermsOfUseDao">
+        <Property name="dbConnectionFactoryConfig">
+            <Property name="com.topcoder.db.connectionfactory.DBConnectionFactoryImpl">
+                <Property name="connections">
+                    <Property name="default">
+                        <Value>InformixJDBCConnection</Value>
+                    </Property>
+                    <Property name="InformixJDBCConnection">
+                        <Property name="producer">
+                            <Value>com.topcoder.db.connectionfactory.producers.JDBCConnectionProducer</Value>
+                        </Property>
+                        <Property name="parameters">
+                            <Property name="jdbc_driver">
+                                <Value>com.informix.jdbc.IfxDriver</Value>
+                            </Property>
+                            <Property name="jdbc_url">
+                                <Value>jdbc:informix-sqli://oltp01.prod.topcoder.com:2020/common_oltp:informixserver=informixoltp_tcp</Value>
+                            </Property>
+                            <Property name="user">
+                                <Value>coder</Value>
+                            </Property>
+                            <Property name="password">
+                                <Value>Qn8TZxFFD77tzQwc</Value>
+                            </Property>
+                            <Property name="IFX_USE_STRENC">
+                                <Value>true</Value>
+                            </Property>
+                            <Property name="new_connection_sql">
+                                <Value>set lock mode to wait 5;</Value>
+                            </Property>
+                        </Property>
+                    </Property>
+                </Property>
+            </Property>
+        </Property>
+        <Property name="loggerName">
+            <Value>com.cronos.termsofuse.dao.impl.TermsOfUseDaoImpl</Value>
+        </Property>
+        <Property name="idGeneratorName">
+            <Value>TERMS_OF_USE_SEQ</Value>
+        </Property>
+    </Config>
+    <Config name="com.cronos.termsofuse.dao.UserTermsOfUseDao">
+        <Property name="dbConnectionFactoryConfig">
+            <Property name="com.topcoder.db.connectionfactory.DBConnectionFactoryImpl">
+                <Property name="connections">
+                    <Property name="default">
+                        <Value>InformixJDBCConnection</Value>
+                    </Property>
+                    <Property name="InformixJDBCConnection">
+                        <Property name="producer">
+                            <Value>com.topcoder.db.connectionfactory.producers.JDBCConnectionProducer</Value>
+                        </Property>
+                        <Property name="parameters">
+                            <Property name="jdbc_driver">
+                                <Value>com.informix.jdbc.IfxDriver</Value>
+                            </Property>
+                            <Property name="jdbc_url">
+                                <Value>jdbc:informix-sqli://oltp01.prod.topcoder.com:2020/common_oltp:informixserver=informixoltp_tcp</Value>
+                            </Property>
+                            <Property name="user">
+                                <Value>coder</Value>
+                            </Property>
+                            <Property name="password">
+                                <Value>Qn8TZxFFD77tzQwc</Value>
+                            </Property>
+                            <Property name="IFX_USE_STRENC">
+                                <Value>true</Value>
+                            </Property>
+                            <Property name="new_connection_sql">
+                                <Value>set lock mode to wait 5;</Value>
+                            </Property>
+                        </Property>
+                    </Property>
+                </Property>
+            </Property>
+        </Property>
+        <Property name="loggerName">
+            <Value>com.cronos.termsofuse.dao.impl.UserTermsOfUseDaoImpl</Value>
+        </Property>
+    </Config>
+    <Config name="com.cronos.termsofuse.dao.ProjectTermsOfUseDao">
+        <Property name="dbConnectionFactoryConfig">
+            <Property name="com.topcoder.db.connectionfactory.DBConnectionFactoryImpl">
+                <Property name="connections">
+                    <Property name="default">
+                        <Value>InformixJDBCConnection</Value>
+                    </Property>
+                    <Property name="InformixJDBCConnection">
+                        <Property name="producer">
+                            <Value>com.topcoder.db.connectionfactory.producers.JDBCConnectionProducer</Value>
+                        </Property>
+                        <Property name="parameters">
+                            <Property name="jdbc_driver">
+                                <Value>com.informix.jdbc.IfxDriver</Value>
+                            </Property>
+                            <Property name="jdbc_url">
+                                <Value>jdbc:informix-sqli://oltp01.prod.topcoder.com:2020/common_oltp:informixserver=informixoltp_tcp</Value>
+                            </Property>
+                            <Property name="user">
+                                <Value>coder</Value>
+                            </Property>
+                            <Property name="password">
+                                <Value>Qn8TZxFFD77tzQwc</Value>
+                            </Property>
+                            <Property name="IFX_USE_STRENC">
+                                <Value>true</Value>
+                            </Property>
+                            <Property name="new_connection_sql">
+                                <Value>set lock mode to wait 5;</Value>
+                            </Property>
+                        </Property>
+                    </Property>
+                </Property>
+            </Property>
+        </Property>
+        <Property name="loggerName">
+            <Value>com.cronos.termsofuse.dao.impl.ProjectTermsOfUseDaoImpl</Value>
+        </Property>
+    </Config>
+</CMConfig>
