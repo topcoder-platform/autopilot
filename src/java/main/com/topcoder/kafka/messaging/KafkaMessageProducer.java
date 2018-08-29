@@ -2,7 +2,10 @@ package com.topcoder.kafka.messaging;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.TimeZone;
 import java.util.PropertyResourceBundle;
 
 import javax.ws.rs.client.Client;
@@ -18,21 +21,65 @@ import com.topcoder.management.phase.autopilot.impl.MessageFormat;
 import com.topcoder.util.log.Level;
 import com.topcoder.util.log.Log;
 import com.topcoder.util.log.LogManager;
+import com.appirio.tech.core.api.v3.util.jwt.JWTTokenGenerator;
 
 public class KafkaMessageProducer {
 
-	// public static final String baseUri =
-	// "http://tc-email-service-elb-508840840.us-east-1.elb.amazonaws.com/eventbus";
-	// public static final String authToken =
-	// "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoibWVzc2FnZS1zZXJ2aWNlIiwiaWF0IjoxNTE3MzA4NjAzLCJleHAiOjE1MjU5NDg2MDN9.SURZlJkhPcwI7cm2SUqBf2Uv7MkaAULuNWHMKTrtykY";
-	private Client client = null;
-	private WebTarget target = null;
-	private PropertyResourceBundle prb = null;
-
+	/**
+	 * <p>
+	 * Represents the event bus api target url. Referenced in ctor().
+	 * </p>
+	 */
 	public String targetURL = "";
-	public String endPoint = "";
-	public String authToken = "";
+
+	/**
+	 * <p>
+	 * Represents the Kafka topic name. Referenced in ctor().
+	 * </p>
+	 */
 	public String topicName = "";
+
+	/**
+	 * <p>
+	 * Represents the Kafka originator name. Referenced in ctor().
+	 * </p>
+	 */
+	public String originator = "";
+
+	/**
+	 * <p>
+	 * Represents the M2M auth0 client id. Referenced in ctor().
+	 * </p>
+	 */
+	public String clientId = "";
+
+	/**
+	 * <p>
+	 * Represents the M2M auth0 client secret. Referenced in ctor().
+	 * </p>
+	 */
+	public String clientSecret = "";
+
+	/**
+	 * <p>
+	 * Represents the M2M auth0 audience. Referenced in ctor().
+	 * </p>
+	 */
+	public String authAudience = "";
+
+	/**
+	 * <p>
+	 * Represents the M2M auth0 domain. Referenced in ctor().
+	 * </p>
+	 */
+	public String authDomain = "";
+
+	/**
+	 * <p>
+	 * Represents the M2M token expiration time. Referenced in ctor().
+	 * </p>
+	 */
+	public int tokenExpirationTime;
 
 	/**
 	 * <p>
@@ -41,6 +88,21 @@ public class KafkaMessageProducer {
 	 * </p>
 	 */
 	public static final String DEFAULT_LOG_NAME = "AutoPilot";
+
+	/**
+	 * <p>
+	 * Represents the kafka message mime type.
+	 * </p>
+	 */
+	private static final String MIME_TYPE = "application/json";
+
+	/**
+	 * <p>
+	 * Represents the kafka config properties file location ctor().
+	 * </p>
+	 */
+	private static final String CONFIG_FILE_PATH  = "/config/kafka-config.properties";
+
 	/**
 	 * <p>
 	 * Represents the log used to do auditing whenever a phase is started/ended.
@@ -51,86 +113,93 @@ public class KafkaMessageProducer {
 	 */
 	private final Log log;
 
-	/**
-	 * This method will read property file and initialize required variables for
-	 * Kafka messaging communication
-	 */
-	private void loadProperties() {
-		try {
-			prb = new PropertyResourceBundle(new FileInputStream(new File("config/kafka-config.properties")));
-			targetURL = prb.getString("kafka.target.url");
-			endPoint = prb.getString("kafka.target.endpoint");
-			authToken = prb.getString("kafka.header.authtoken");
-			topicName = prb.getString("kafka.topic");
-		} catch (Exception e) {
-			setLocalKafkaVariables();
-			getLog().log(Level.ERROR, "Exception in loading Kafka Properties : " + e.getMessage());
-			e.printStackTrace();
-		}
+	private void setLocalKafkaVariables() {
+		targetURL = "https://api.topcoder-dev.com/v5/bus/events";
+		topicName = "notifications.kafka.queue.java.test";
+		originator = "AUTO_PILOT";
+		clientId= "5fctfjaLJHdvM04kSrCcC8yn0I4t1JTd";
+		clientSecret = "GhvDENIrYXo-d8xQ10fxm9k7XSVg491vlpvolXyWNBmeBdhsA5BAq2mH4cAAYS0x";
+		authDomain = "topcoder-newauth.auth0.com";
+		authAudience = "https://www.topcoder.com";
 	}
 
-	private void setLocalKafkaVariables() {
-		targetURL = "https://api.topcoder-dev.com/eventbus/events";
-//		endPoint = "/events";
-		authToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJjb3BpbG90IiwiYWFhIiwidGVzdFJvbGUiLCJ0b255X3Rlc3RfMSIsIlRvcGNvZGVyIFVzZXIiLCJhc2RkIiwiYWRtaW5pc3RyYXRvciJdLCJpc3MiOiJodHRwczovL2FwaS50b3Bjb2Rlci1kZXYuY29tIiwiaGFuZGxlIjoibXR3b21leSIsImV4cCI6MTUyMjExMTI2MywidXNlcklkIjoiNDAwMTYzNTYiLCJpYXQiOjE1MTcwMTM1NDgsImVtYWlsIjoibXR3b21leUB0b3Bjb2Rlci5jb20iLCJqdGkiOiJkYTRjMjU2Yy0wYzZkLTQxYmMtYTdjYy01NmYxOTkwYjE1YjAiLCJuYW1lIjoicHJvamVjdC1zZXJ2aWNlIn0.r3zMY2ntKezWt6xB8ENH7HM27N1oLwzZlLQNQ1Ek-10";
-		topicName = "notifications.kafka.queue.java.test";
+	private PropertyResourceBundle getPropertyBundle() throws Exception {
+		PropertyResourceBundle prb = null;
+		String fileLocation = System.getProperty("user.dir") + CONFIG_FILE_PATH;
+		File file = new File(fileLocation);
+		if (file.exists()) {
+			getLog().log(Level.INFO, "Using file in " + fileLocation);
+			prb = new PropertyResourceBundle(new FileInputStream(file));
+		} else {
+			getLog().log(Level.WARN, "Will use file in classpath");
+			prb = new PropertyResourceBundle(getClass().getResourceAsStream(CONFIG_FILE_PATH));
+		}
+		return prb;
 	}
 
 	public KafkaMessageProducer() {
 		this.log = LogManager.getLog(DEFAULT_LOG_NAME);
-		loadProperties();
-		client = ClientBuilder.newClient();
-		target = client.target(targetURL);
+
+		try {
+			PropertyResourceBundle prb = getPropertyBundle();
+			targetURL = prb.getString("kafka.target.url");
+			clientId = prb.getString("kafka.security.clientId");
+			clientSecret = prb.getString("kafka.security.clientsecret");
+			authDomain = prb.getString("kafka.security.authdomain");
+			authAudience = prb.getString("kafka.security.authAudience");
+			topicName = prb.getString("kafka.topic");
+			originator = prb.getString("kafka.originator");
+			tokenExpirationTime = Integer.parseInt(prb.getString("kafka.security.tokenExpirationtime"));
+		} catch(NumberFormatException e) {
+			tokenExpirationTime = 60 * 24;
+		} catch (Exception e) {
+			setLocalKafkaVariables();
+			getLog().log(Level.ERROR, "Exception in loading Kafka Properties : " + e.getMessage());
+		}
+
+		getLog().log(Level.INFO, String.format("Topic %s, originator %s", topicName, originator));
 	}
 
 	public void postRequestUsingGson(Object payload) {
-		//target = target.path(endPoint);
-		Gson gson = new Gson();
-		// MessageTemplate msg = new MessageTemplate();
-		// msg.setType("notifications.kafka.queue.java.test");
-		// msg.setMessage("{ \"data\": \"Test auth code 12151..\" }");
+		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+		dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
 
 		// Central location to set topicname
 		MessageTemplate messageTemplate = new MessageTemplate();
 		messageTemplate.setTopic(topicName);
-		messageTemplate.setOriginator("AUTO_PILOT");
-		messageTemplate.setTimestamp(new Date().toString());
-		messageTemplate.setMime_type("application/json");
+		messageTemplate.setOriginator(originator);
+		messageTemplate.setTimestamp(dateFormat.format(new Date()));
+		messageTemplate.setMime_type(MIME_TYPE);
 		messageTemplate.setPayload(payload);
 
-		// TODO: this is temporary msg which will be fixed in later version from
-		// bus API
-		// Removed below as part of new json structure
-		// String finalMsg = "{ \"data\": "+ payload +" }";
-		// messageTemplate.setMessage(strMessage);
-		// messageTemplate.setMessage(finalMsg);
-
+		Gson gson = new Gson();
 		String strMessage = gson.toJson(messageTemplate);
 
-		getLog().log(Level.INFO, "KAFKA_MESSAGE :::" + strMessage);
+		getLog().log(Level.DEBUG, "KAFKA_MESSAGE ::: " + strMessage);
+		try {
+			Client client = ClientBuilder.newClient();
+			WebTarget target = client.target(targetURL);
+			Entity entity = Entity.entity(strMessage, MediaType.APPLICATION_JSON_TYPE);
+			Response response = target.request(MediaType.APPLICATION_JSON_TYPE)
+				.header("Authorization", "Bearer " + getM2MToken())
+			  .post(entity, Response.class);
 
-		// POST Request from jersey REST Client
-		Response response = target.request(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + authToken)
-				.post(Entity.entity(strMessage, MediaType.APPLICATION_JSON), Response.class);
-
-		getLog().log(Level.INFO, response);
-		//getLog().log(Level.INFO, "KAFKA MESSAGE RES_CODE :::" + response.getStatus());
-
+			getLog().log(Level.INFO, response);
+		} catch(Exception e) {
+			getLog().log(Level.ERROR, "Exception when sending message to Kakfa Bus : " + e.getMessage());
+		} catch(Throwable e) {
+			getLog().log(Level.ERROR, "Throwable when sending message to Kakfa Bus : " + e.getMessage());
+		}
 	}
 
 	protected Log getLog() {
 		return log;
 	}
 
-	/*public static void main(String[] args) {
-		KafkaMessageProducer test = new KafkaMessageProducer();
-
-		MessageFormat message = new MessageFormat("Thu Feb 22 16:14:22 EST 2018", 30050490, 741615, "Registration",
-				"END", "22841596");
-		Gson gson = new GsonBuilder().create();
-		System.out.println(gson.toJson(message));
-
-		test.postRequestUsingGson(gson.toJson(message));
-	}*/
+	public String getM2MToken() throws Exception {
+		JWTTokenGenerator generator = JWTTokenGenerator.getInstance(this.clientId,
+			this.clientSecret, this.authAudience,this.authDomain,this.tokenExpirationTime);
+		return generator.getMachineToken();
+	}
 
 }
