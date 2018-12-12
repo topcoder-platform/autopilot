@@ -14,6 +14,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
 import com.fasterxml.jackson.core.JsonFactory;
+
 import com.topcoder.kafka.messaging.KafkaMessageProducer;
 import com.topcoder.kafka.messaging.MessageTemplate;
 import com.topcoder.management.phase.PhaseManagementException;
@@ -22,6 +23,8 @@ import com.topcoder.management.phase.autopilot.AutoPilotResult;
 import com.topcoder.management.phase.autopilot.ConfigurationException;
 import com.topcoder.management.phase.autopilot.PhaseOperationException;
 import com.topcoder.management.phase.autopilot.ProjectPilot;
+import com.topcoder.management.project.PersistenceException;
+import com.topcoder.management.project.ProjectManager;
 import com.topcoder.project.phases.Dependency;
 import com.topcoder.project.phases.Phase;
 import com.topcoder.project.phases.Project;
@@ -88,6 +91,16 @@ public class DefaultProjectPilot implements ProjectPilot {
 
     /**
      * <p>
+     * Represents the ProjectManager instance that is used to retrieve project. This variable
+     * is initially null, initialized in constructor using object factory and immutable afterwards.
+     * It is referenced by advancePhase to getPhases, query whether phase can be ended/started, and
+     * end/start the phase itself. It can be retrieved with the getter.
+     * </p>
+     */
+    private final ProjectManager projectManager;
+
+    /**
+     * <p>
      * Represents the log used to do auditing whenever a phase is started/ended. The audit log
      * should include timestamp, project, phase, operation, and the operator This variable is
      * initially null, initialized in constructor and immutable afterwards. It can be retrieved with
@@ -138,7 +151,7 @@ public class DefaultProjectPilot implements ProjectPilot {
      */
     public DefaultProjectPilot() throws ConfigurationException {
         this(DefaultProjectPilot.class.getName(), PhaseManager.class.getName(),
-            DEFAULT_SCHEDULED_STATUS_NAME, DEFAULT_OPEN_STATUS_NAME, DEFAULT_LOG_NAME);
+            DEFAULT_SCHEDULED_STATUS_NAME, DEFAULT_OPEN_STATUS_NAME, DEFAULT_LOG_NAME, ProjectManager.class.getName());
     }
 
     /**
@@ -160,7 +173,7 @@ public class DefaultProjectPilot implements ProjectPilot {
      *             phase manager instance or the log
      */
     public DefaultProjectPilot(String namespace, String phaseManagerKey,
-        String scheduledStatusName, String openStatusName, String logName)
+        String scheduledStatusName, String openStatusName, String logName, String projectManagerkey)
         throws ConfigurationException {
         // Check arguments.
         checkArguments(namespace, phaseManagerKey, scheduledStatusName, openStatusName, logName);
@@ -168,6 +181,7 @@ public class DefaultProjectPilot implements ProjectPilot {
         // Create object factory to create phaseManager.
         ObjectFactory of;
         Object objPhaseManager;
+        Object objProjectManager;
         try {
             of = new ObjectFactory(new ConfigManagerSpecificationFactory(namespace));
 
@@ -175,6 +189,12 @@ public class DefaultProjectPilot implements ProjectPilot {
             if (!PhaseManager.class.isInstance(objPhaseManager)) {
                 throw new ConfigurationException(
                     "fail to create PhaseManager object cause of bad type:" + objPhaseManager);
+            }
+
+            objProjectManager = of.createObject(projectManagerkey);
+            if (!ProjectManager.class.isInstance(objProjectManager)) {
+                throw new ConfigurationException(
+                        "fail to create ProjectManager object cause of bad type:" + objProjectManager);
             }
         } catch (InvalidClassSpecificationException e) {
             throw new ConfigurationException(
@@ -187,9 +207,11 @@ public class DefaultProjectPilot implements ProjectPilot {
                 "fail to create object factory cause of illegal reference", e);
         }
 
+
         // Assign to fields.
         this.log = LogManager.getLog(logName);
         this.phaseManager = (PhaseManager) objPhaseManager;
+        this.projectManager = (ProjectManager) objProjectManager;
         this.scheduledStatusName = scheduledStatusName;
         this.openStatusName = openStatusName;
     }
@@ -207,7 +229,7 @@ public class DefaultProjectPilot implements ProjectPilot {
      *             parameters are empty (trimmed) string
      */
     public DefaultProjectPilot(PhaseManager phaseManager, String scheduledStatusName,
-        String openStatusName, Log log) {
+        String openStatusName, Log log, ProjectManager projectManager) {
         // Check arguments.
         if (null == phaseManager) {
             throw new IllegalArgumentException("phaseManager cannot be null");
@@ -233,11 +255,15 @@ public class DefaultProjectPilot implements ProjectPilot {
         if (null == log) {
             throw new IllegalArgumentException("log cannot be null");
         }
+        if (null == projectManager) {
+            throw new IllegalArgumentException("projectManager cannot be null");
+        }
 
         this.phaseManager = phaseManager;
         this.scheduledStatusName = scheduledStatusName;
         this.openStatusName = openStatusName;
         this.log = log;
+        this.projectManager = projectManager;
 
         getLog().log(Level.INFO, "created DefaultProjectPilot");
     }
@@ -296,6 +322,8 @@ public class DefaultProjectPilot implements ProjectPilot {
     protected PhaseManager getPhaseManager() {
         return this.phaseManager;
     }
+
+    protected ProjectManager getProjectManager() { return this.projectManager; }
 
     /**
      * <p>
@@ -466,7 +494,15 @@ public class DefaultProjectPilot implements ProjectPilot {
 
                 phaseManager.end(phase, operator);
                 count[0]++;
-                doAudit(phase, true, operator);
+
+                com.topcoder.management.project.Project project;
+                try {
+                    project = projectManager.getProject(phase.getProject().getId());
+                } catch (PersistenceException e) {
+                    throw new PhaseOperationException(phase.getProject().getId(), phase, "Failed to get project status");
+                }
+
+                doAudit(phase, true, operator, project.getProjectStatus().getName());
             }
         } catch (PhaseManagementException e) {
             getLog().log(Level.ERROR, "fail to end the phase cause of phase management exception");
@@ -504,10 +540,26 @@ public class DefaultProjectPilot implements ProjectPilot {
      * @param operator the operator name to audit
      * @throws PhaseOperationException if any error occurs auditing the entry
      */
+    protected void doAudit(Phase phase, boolean isEnd, String operator)
+            throws PhaseOperationException {
+        doAudit(phase, isEnd, operator, null);
+    }
+    /**
+     * <p>
+     * This method audits a phase change. It is called by doPhaseOperation whenever a phase is
+     * successfully started/ended. It should log the timestamp, project, phase, operation, and the
+     * operator name.
+     * </p>
+     * @param phase the phase to audit
+     * @param isEnd true if the phase was ended; false if the phase was started
+     * @param operator the operator name to audit
+     * @param projectStatus project status
+     * @throws PhaseOperationException if any error occurs auditing the entry
+     */
     /**
      * Badal : added sample json message for testing on dev
      */
-    protected void doAudit(Phase phase, boolean isEnd, String operator)
+    protected void doAudit(Phase phase, boolean isEnd, String operator, String projectStatus)
         throws PhaseOperationException {
         getLog().log(
             Level.INFO,
@@ -518,14 +570,16 @@ public class DefaultProjectPilot implements ProjectPilot {
                 + phase.getId()
                 + " - phase type "
                 + ((null == phase.getPhaseType()) ? "Null Phase Type" : phase.getPhaseType()
-                    .getName()) + " - " + (isEnd ? "END" : "START") + " - operator " + operator);
+                    .getName()) + " - " + (isEnd ? "END" : "START") + " - operator " + operator
+                + " - projectStatus " + projectStatus);
 
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+
         MessageFormat message = new MessageFormat(dateFormat.format(new Date()),
-          phase.getProject().getId(), phase.getId(),
-          (null == phase.getPhaseType()) ? "Null Phase Type" : phase.getPhaseType().getName(),
-          isEnd ? "END" : "START", operator);
+                    phase.getProject().getId(), phase.getId(),
+                    (null == phase.getPhaseType()) ? "Null Phase Type" : phase.getPhaseType().getName(),
+                    isEnd ? "END" : "START", operator, projectStatus);
 
         getLog().log(Level.INFO, "JSON_MESSAGE ::: WILL SEND");
 
