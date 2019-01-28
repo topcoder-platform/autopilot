@@ -8,8 +8,10 @@ public class MessageFormat {
 	private String phaseTypeName;
 	private String state;
 	private String operator;
+	private String projectStatus;
 	
-	public MessageFormat(String date, long projectId, long phaseId, String phaseTypeName, String state, String operator) {
+	public MessageFormat(String date, long projectId, long phaseId, String phaseTypeName, String state, String operator,
+						 String projectStatus) {
 		super();
 		this.date = date;
 		this.projectId = projectId;
@@ -17,6 +19,7 @@ public class MessageFormat {
 		this.phaseTypeName = phaseTypeName;
 		this.state = state;
 		this.operator = operator;
+		this.projectStatus = projectStatus;
 	}
 	
 	public String getDate() {
@@ -57,5 +60,12 @@ public class MessageFormat {
 	public void setOperator(String operator) {
 		this.operator = operator;
 	}
-	
+
+	public String getProjectStatus() {
+		return projectStatus;
+	}
+
+	public void setProjectStatus(String projectStatus) {
+		this.projectStatus = projectStatus;
+	}
 }
