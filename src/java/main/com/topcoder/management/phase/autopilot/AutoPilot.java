@@ -322,6 +322,7 @@ public class AutoPilot {
             // Check if the project is processing by another thread
             synchronized (processingProjectIds) {
                 if (processingProjectIds.contains(longProjectId)) {
+                    log.log(Level.INFO, new LogMessage(null, operator, "Stopped in synchronized for projectId=" + longProjectId));
                     continue;
                 } else {
                     processingProjectIds.add(longProjectId);
@@ -362,7 +363,7 @@ public class AutoPilot {
      * @throws PhaseOperationException if any error occurs while ending/starting a phase
      */
     public AutoPilotResult advanceProject(long projectId, String operator) throws PhaseOperationException {
-    	log.log(Level.DEBUG, new LogMessage(new Long(projectId), operator, "Checking project phases."));
+    	log.log(Level.INFO, new LogMessage(new Long(projectId), operator, "Checking project phases."));
         return projectPilot.advancePhases(projectId, operator);
     }
     /**
