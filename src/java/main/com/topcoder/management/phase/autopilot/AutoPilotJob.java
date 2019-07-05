@@ -341,7 +341,7 @@ public class AutoPilotJob implements Runnable, Schedulable {
     public AutoPilotResult[] execute() throws AutoPilotSourceException, PhaseOperationException {
         log.log(Level.INFO, new LogMessage(null, getOperator(), "AutoPilot job iteration."));
         AutoPilotResult[] ret = autoPilot.advanceProjects(getOperator());
-        log.log(Level.DEBUG, new LogMessage(null, getOperator(), "AutoPilot job iteration - end."));
+        log.log(Level.INFO, new LogMessage(null, getOperator(), "AutoPilot job iteration - end."));
         return ret;
     }
 
