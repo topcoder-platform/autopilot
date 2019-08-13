@@ -158,6 +158,9 @@ public class KafkaMessageProducer {
 			originator = prb.getString("kafka.originator");
 			tokenExpirationTime = Integer.parseInt(prb.getString("kafka.security.tokenExpirationtime"));
 			authProxyServerUrl = prb.getString("kafka.security.authProxyServerUrl");
+		} catch (NumberFormatException e) {
+			tokenExpirationTime = 60 * 24;
+		} catch (Exception e) {
 			setLocalKafkaVariables();
 			getLog().log(Level.ERROR, "Exception in loading Kafka Properties : " + e.getMessage());
 		}
