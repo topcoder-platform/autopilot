@@ -53,9 +53,11 @@
   <path id="component.3rdParty-dependencies">
     <pathelement location="${xerces.jar}"/>
     <pathelement location="${log4j.jar}"/>
+    <pathelement location="${java-jwt.jar}"/>
   </path>
   <path id="component.test.3rdParty-dependencies">
     <pathelement location="${xerces.jar}"/>
     <pathelement location="${junit.jar}"/>
+    <pathelement location="${java-jwt.jar}"/>
   </path>
 </project>
