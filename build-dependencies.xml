@@ -27,6 +27,7 @@
   <property name="junit.jar" value="${ext_libdir}/junit/3.8.2/junit.jar"/>
   <property name="xerces.jar" value="${ext_libdir}/xerces/1.4.4/xerces.jar"/>
   <property name="log4j.jar" value="${ext_libdir}/log4j.jar"/>
+  <property name="java-jwt.jar" value="${ext_libdir}/java-jwt-3.2.0.jar"/>
   <!--Path declarations which are to be used in the master build file.-->
   <path id="component.tcs-dependencies">
     <pathelement location="${base_exception.jar}"/>
@@ -47,7 +48,7 @@
     <pathelement location="${typesafe_enum.jar}"/>
     <pathelement location="${workdays.jar}"/>
     <pathelement location="${object_factory_config_manager_plugin.jar}"/>
-	<pathelement location="${core.api.jar}" />
+	  <pathelement location="${core.api.jar}" />
   </path>
   <path id="component.3rdParty-dependencies">
     <pathelement location="${xerces.jar}"/>
