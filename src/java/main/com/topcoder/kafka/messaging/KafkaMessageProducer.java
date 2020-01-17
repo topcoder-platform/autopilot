@@ -83,6 +83,13 @@ public class KafkaMessageProducer {
 
 	/**
 	 * <p>
+	 * Represents the M2M token expiration time. Referenced in ctor().
+	 * </p>
+	 */
+	public String authProxyServerUrl = "";
+
+	/**
+	 * <p>
 	 * Represents the default log name to be used for auditing. Referenced in
 	 * ctor().
 	 * </p>
@@ -101,14 +108,14 @@ public class KafkaMessageProducer {
 	 * Represents the kafka config properties file location ctor().
 	 * </p>
 	 */
-	private static final String CONFIG_FILE_PATH  = "/config/kafka-config.properties";
+	private static final String CONFIG_FILE_PATH = "/config/kafka-config.properties";
 
 	/**
 	 * <p>
-	 * Represents the log used to do auditing whenever a phase is started/ended.
-	 * The audit log should include timestamp, project, phase, operation, and
-	 * the operator This variable is initially null, initialized in constructor
-	 * and immutable afterwards. It can be retrieved with the getter.
+	 * Represents the log used to do auditing whenever a phase is started/ended. The
+	 * audit log should include timestamp, project, phase, operation, and the
+	 * operator This variable is initially null, initialized in constructor and
+	 * immutable afterwards. It can be retrieved with the getter.
 	 * </p>
 	 */
 	private final Log log;
@@ -117,7 +124,7 @@ public class KafkaMessageProducer {
 		targetURL = "https://api.topcoder-dev.com/v5/bus/events";
 		topicName = "notifications.kafka.queue.java.test";
 		originator = "AUTO_PILOT";
-		clientId= "5fctfjaLJHdvM04kSrCcC8yn0I4t1JTd";
+		clientId = "5fctfjaLJHdvM04kSrCcC8yn0I4t1JTd";
 		clientSecret = "GhvDENIrYXo-d8xQ10fxm9k7XSVg491vlpvolXyWNBmeBdhsA5BAq2mH4cAAYS0x";
 		authDomain = "topcoder-newauth.auth0.com";
 		authAudience = "https://www.topcoder.com";
@@ -150,7 +157,8 @@ public class KafkaMessageProducer {
 			topicName = prb.getString("kafka.topic");
 			originator = prb.getString("kafka.originator");
 			tokenExpirationTime = Integer.parseInt(prb.getString("kafka.security.tokenExpirationtime"));
-		} catch(NumberFormatException e) {
+			authProxyServerUrl = prb.getString("kafka.security.authProxyServerUrl");
+		} catch (NumberFormatException e) {
 			tokenExpirationTime = 60 * 24;
 		} catch (Exception e) {
 			setLocalKafkaVariables();
@@ -181,13 +189,12 @@ public class KafkaMessageProducer {
 			WebTarget target = client.target(targetURL);
 			Entity entity = Entity.entity(strMessage, MediaType.APPLICATION_JSON_TYPE);
 			Response response = target.request(MediaType.APPLICATION_JSON_TYPE)
-				.header("Authorization", "Bearer " + getM2MToken())
-			  .post(entity, Response.class);
+					.header("Authorization", "Bearer " + getM2MToken()).post(entity, Response.class);
 
 			getLog().log(Level.INFO, response);
-		} catch(Exception e) {
+		} catch (Exception e) {
 			getLog().log(Level.ERROR, "Exception when sending message to Kakfa Bus : " + e.getMessage());
-		} catch(Throwable e) {
+		} catch (Throwable e) {
 			getLog().log(Level.ERROR, "Throwable when sending message to Kakfa Bus : " + e.getMessage());
 		}
 	}
@@ -197,8 +204,8 @@ public class KafkaMessageProducer {
 	}
 
 	public String getM2MToken() throws Exception {
-		JWTTokenGenerator generator = JWTTokenGenerator.getInstance(this.clientId,
-			this.clientSecret, this.authAudience,this.authDomain,this.tokenExpirationTime);
+		JWTTokenGenerator generator = JWTTokenGenerator.getInstance(this.clientId, this.clientSecret, this.authAudience,
+				this.authDomain, this.tokenExpirationTime, this.authProxyServerUrl);
 		return generator.getMachineToken();
 	}
 

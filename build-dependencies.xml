@@ -23,10 +23,12 @@
   <property name="search_builder.jar" value="${tcs_libdir}/search_builder/1.3.2/search_builder.jar"/>
   <property name="typesafe_enum.jar" value="${tcs_libdir}/typesafe_enum/1.1.0/typesafe_enum.jar"/>
   <property name="workdays.jar" value="${tcs_libdir}/workdays/1.1.0/workdays.jar"/>
+  <property name="core.api.jar" value="${tcs_libdir}/core.api/4.3.3/core.api.jar"/>
   <!--3rd party dependencies-->
   <property name="junit.jar" value="${ext_libdir}/junit/3.8.2/junit.jar"/>
   <property name="xerces.jar" value="${ext_libdir}/xerces/1.4.4/xerces.jar"/>
   <property name="log4j.jar" value="${ext_libdir}/log4j.jar"/>
+  <property name="java-jwt.jar" value="${ext_libdir}/java-jwt-3.2.0.jar"/>
   <!--Path declarations which are to be used in the master build file.-->
   <path id="component.tcs-dependencies">
     <pathelement location="${base_exception.jar}"/>
@@ -47,14 +49,16 @@
     <pathelement location="${typesafe_enum.jar}"/>
     <pathelement location="${workdays.jar}"/>
     <pathelement location="${object_factory_config_manager_plugin.jar}"/>
-	<pathelement location="${core.api.jar}" />
+	  <pathelement location="${core.api.jar}" />
   </path>
   <path id="component.3rdParty-dependencies">
     <pathelement location="${xerces.jar}"/>
     <pathelement location="${log4j.jar}"/>
+    <pathelement location="${java-jwt.jar}"/>
   </path>
   <path id="component.test.3rdParty-dependencies">
     <pathelement location="${xerces.jar}"/>
     <pathelement location="${junit.jar}"/>
+    <pathelement location="${java-jwt.jar}"/>
   </path>
 </project>
