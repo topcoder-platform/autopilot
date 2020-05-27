@@ -11,7 +11,7 @@
   <property name="ext_libdir" value="${libdir}/third_party"/>
   <property name="debug" value="off"/>
   <property name="verbose" value="no"/>
-  <property name="cobertura.dir" value="${ext_libdir}/cobertura/1.9"/>
+  <property name="cobertura.dir" value="${ext_libdir}/cobertura/1.8"/>
 
   <!-- DIRECTORY SETUP -->
   <property name="srcdir" value="src"/>
