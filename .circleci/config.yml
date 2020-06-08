@@ -49,10 +49,7 @@ build_steps: &build_steps
         name: Fetching Libraries
         command: |
           mkdir -p ../tcs/lib
-          git clone https://github.com/topcoder-platform/tc-java-component-libs.git -b $SUBMODULE_BRANCH ../tcs/lib/
-          mkdir -p ../tcs/lib/third_party/cobertura/1.8
-          unzip cobertura18.zip 
-          cp -rvf 1.8/* ../tcs/lib/third_party/cobertura/1.8/                                 
+          git clone https://github.com/topcoder-platform/tc-java-component-libs.git -b $SUBMODULE_BRANCH ../tcs/lib/                              
     - run:
         name: Installation of build dependencies.
         command: |
