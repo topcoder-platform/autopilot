@@ -56,18 +56,14 @@ build_steps: &build_steps
           source awsenvconf
           # ./buildproperties.sh -e $BUILD_ENV -k onlinereviewapp
           ant clean dist
-    # - run:
-    #     name: Build Pacakge
-    #     command: ./build-package.sh $APPNAME            
-    # - run:
-    #     name: "Deployment OR app and direct web"
-    #     command: |
-    #       source awsenvconf
-    #       ./buildenv.sh -e $DEPLOY_ENV -b ${APPNAME}-deployvar
-    #       source buildenvvar
-    #       source apppackagever          
-    #       echo "executing deploy"
-    #       ./deploy.sh $BUILD_ENV $ORAPPVER $APPNAME
+    - deploy:
+        name: Moving library to github
+        command: |
+          source awsenvconf
+          ./buildenv.sh -e $DEPLOY_ENV -b ${LBUILD_ENV}-${APPNAME}-deployvar
+          source buildenvvar        
+          . deploy.sh
+       
 
 
 jobs:
