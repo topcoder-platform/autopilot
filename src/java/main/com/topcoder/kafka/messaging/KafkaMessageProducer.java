@@ -2,6 +2,8 @@ package com.topcoder.kafka.messaging;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -193,7 +195,10 @@ public class KafkaMessageProducer {
 
 			getLog().log(Level.INFO, response);
 		} catch (Exception e) {
+			StringWriter sw = new StringWriter();
+			e.printStackTrace(new PrintWriter(sw));
 			getLog().log(Level.ERROR, "Exception when sending message to Kakfa Bus : " + e.getMessage());
+			getLog().log(Level.ERROR, "details: " + sw.toString());
 		} catch (Throwable e) {
 			getLog().log(Level.ERROR, "Throwable when sending message to Kakfa Bus : " + e.getMessage());
 		}
