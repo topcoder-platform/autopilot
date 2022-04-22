@@ -1,0 +1,7 @@
+build
+build.properties
+token.properties
+.DS_Store
+*.iml
+target
+.idea

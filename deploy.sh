@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-cp -vf ./build/dist/lib/tcs/auto_pilot/1.0.2/auto_pilot.jar ../tcs/lib/tcs/auto_pilot/1.0.2/
+cp -vf ./target/auto-pilot-1.0-SNAPSHOT.jar ../tcs/lib/tcs/auto_pilot/1.0.2/auto_pilot.jar
 cd ../tcs/lib
 export gitemail=$(curl -s https://api.github.com/users/$GITUSER/events/public | grep -m 1 -i email | cut -d : -f2 | cut -d , -f1 | sed -e 's/ //' )
 git config user.name "$GITUSER"
