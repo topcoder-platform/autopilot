@@ -335,42 +335,42 @@ public class ProjectManagerImpl implements ProjectManager {
     }
 
     @Override
-    public Project[] getProjectsByDirectProjectId(long l) throws PersistenceException {
+    public Project[] getProjectsByDirectProjectId(long directProjectId) throws PersistenceException {
         return new Project[0];
     }
 
     @Override
-    public FileType[] getProjectFileTypes(long l) throws PersistenceException {
+    public FileType[] getProjectFileTypes(long projectId) throws PersistenceException {
         return new FileType[0];
     }
 
     @Override
-    public void updateProjectFileTypes(long l, List<FileType> list, String s) throws PersistenceException {
+    public void updateProjectFileTypes(long projectId, List<FileType> fileTypes, String operator) throws PersistenceException {
 
     }
 
     @Override
-    public Prize[] getProjectPrizes(long l) throws PersistenceException {
+    public Prize[] getProjectPrizes(long projectId) throws PersistenceException {
         return new Prize[0];
     }
 
     @Override
-    public void updateProjectPrizes(long l, List<Prize> list, String s) throws PersistenceException {
+    public void updateProjectPrizes(long projectId, List<Prize> prizes, String operator) throws PersistenceException {
 
     }
 
     @Override
-    public FileType createFileType(FileType fileType, String s) throws PersistenceException {
+    public FileType createFileType(FileType fileType, String operator) throws PersistenceException {
         return null;
     }
 
     @Override
-    public void updateFileType(FileType fileType, String s) throws PersistenceException {
+    public void updateFileType(FileType fileType, String operator) throws PersistenceException {
 
     }
 
     @Override
-    public void removeFileType(FileType fileType, String s) throws PersistenceException {
+    public void removeFileType(FileType fileType, String operator) throws PersistenceException {
 
     }
 
@@ -385,42 +385,42 @@ public class ProjectManagerImpl implements ProjectManager {
     }
 
     @Override
-    public Prize createPrize(Prize prize, String s) throws PersistenceException {
+    public Prize createPrize(Prize prize, String operator) throws PersistenceException {
         return null;
     }
 
     @Override
-    public void updatePrize(Prize prize, String s) throws PersistenceException {
+    public void updatePrize(Prize prize, String operator) throws PersistenceException {
 
     }
 
     @Override
-    public void removePrize(Prize prize, String s) throws PersistenceException {
+    public void removePrize(Prize prize, String operator) throws PersistenceException {
 
     }
 
     @Override
-    public ProjectStudioSpecification createProjectStudioSpecification(ProjectStudioSpecification projectStudioSpecification, String s) throws PersistenceException {
+    public ProjectStudioSpecification createProjectStudioSpecification(ProjectStudioSpecification spec, String operator) throws PersistenceException {
         return null;
     }
 
     @Override
-    public void updateProjectStudioSpecification(ProjectStudioSpecification projectStudioSpecification, String s) throws PersistenceException {
+    public void updateProjectStudioSpecification(ProjectStudioSpecification spec, String operator) throws PersistenceException {
 
     }
 
     @Override
-    public void removeProjectStudioSpecification(ProjectStudioSpecification projectStudioSpecification, String s) throws PersistenceException {
+    public void removeProjectStudioSpecification(ProjectStudioSpecification spec, String operator) throws PersistenceException {
 
     }
 
     @Override
-    public ProjectStudioSpecification getProjectStudioSpecification(long l) throws PersistenceException {
+    public ProjectStudioSpecification getProjectStudioSpecification(long projectId) throws PersistenceException {
         return null;
     }
 
     @Override
-    public void updateStudioSpecificationForProject(ProjectStudioSpecification projectStudioSpecification, long l, String s) throws PersistenceException {
+    public void updateStudioSpecificationForProject(ProjectStudioSpecification spec, long projectId, String operator) throws PersistenceException {
 
     }
 }

@@ -149,7 +149,7 @@ public class ProjectManagerImpl2 implements ProjectManager {
      * @throws ValidationException if error occurred while validating the project instance.
      */
     public void createProject(Project project, String operator) throws PersistenceException,
-            ValidationException {
+        ValidationException {
         // your code here
     }
 
@@ -176,7 +176,7 @@ public class ProjectManagerImpl2 implements ProjectManager {
      * @throws ValidationException if error occurred while validating the project instance.
      */
     public void updateProject(Project project, String reason, String operator)
-            throws PersistenceException, ValidationException {
+        throws PersistenceException, ValidationException {
         // your code here
         project.setModificationUser("foo");
         project.setModificationTimestamp(new Date());

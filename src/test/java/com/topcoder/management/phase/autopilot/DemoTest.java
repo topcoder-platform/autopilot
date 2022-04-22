@@ -38,9 +38,9 @@ public class DemoTest extends TestCase {
     protected void setUp() throws Exception {
         ConfigManager cfg = ConfigManager.getInstance();
         cfg.add(ActiveAutoPilotSource.class.getName(), "active_auto_source_pilot.xml",
-                ConfigManager.CONFIG_XML_FORMAT);
+            ConfigManager.CONFIG_XML_FORMAT);
         cfg.add(DefaultProjectPilot.class.getName(), "project_pilot.xml",
-                ConfigManager.CONFIG_XML_FORMAT);
+            ConfigManager.CONFIG_XML_FORMAT);
         cfg.add("logging.xml");
         cfg.add(AutoPilot.class.getName(), "auto_pilot.xml", ConfigManager.CONFIG_XML_FORMAT);
         cfg.add("scheduler", "demo_scheduler.xml", ConfigManager.CONFIG_XML_FORMAT);
@@ -78,7 +78,7 @@ public class DemoTest extends TestCase {
         System.out.println("Projects processed: " + result.length);
         for (int i = 0; i < result.length; i++) {
             System.out.println("  ID: " + result[i].getProjectId() + " �C " + " ended: "
-                    + result[i].getPhaseEndedCount() + " started: " + result[i].getPhaseStartedCount());
+                + result[i].getPhaseEndedCount() + " started: " + result[i].getPhaseStartedCount());
         }
 
         // advance phases for the given project ids

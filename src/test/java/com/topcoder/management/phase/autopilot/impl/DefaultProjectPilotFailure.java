@@ -64,7 +64,7 @@ public class DefaultProjectPilotFailure extends TestCase {
     protected DefaultProjectPilot createProjectPilot() throws Exception {
         ConfigManager cfg = ConfigManager.getInstance();
         cfg.add(DefaultProjectPilot.class.getName(), "project_pilot.xml",
-                ConfigManager.CONFIG_XML_FORMAT);
+            ConfigManager.CONFIG_XML_FORMAT);
         cfg.add("logging.xml");
         return new DefaultProjectPilot();
     }

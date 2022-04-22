@@ -42,9 +42,9 @@ public class AutoPilotJobTest extends TestCase {
 
         ConfigManager cfg = ConfigManager.getInstance();
         cfg.add(ActiveAutoPilotSource.class.getName(), "active_auto_source_pilot.xml",
-                ConfigManager.CONFIG_XML_FORMAT);
+            ConfigManager.CONFIG_XML_FORMAT);
         cfg.add(DefaultProjectPilot.class.getName(), "project_pilot.xml",
-                ConfigManager.CONFIG_XML_FORMAT);
+            ConfigManager.CONFIG_XML_FORMAT);
         cfg.add("logging.xml");
 
         cfg.add(AutoPilot.class.getName(), "auto_pilot.xml", ConfigManager.CONFIG_XML_FORMAT);
@@ -52,12 +52,12 @@ public class AutoPilotJobTest extends TestCase {
         // Operator is omitted in config files.
         cfg.add(AutoPilotJob.class.getName(), "auto_pilot_job.xml", ConfigManager.CONFIG_XML_FORMAT);
         cfg.add(AutoPilotJob.class.getName() + AutoPilotJob.OBJECT_FACTORY_POSTFIX,
-                "auto_pilot_job_factory.xml", ConfigManager.CONFIG_XML_FORMAT);
+            "auto_pilot_job_factory.xml", ConfigManager.CONFIG_XML_FORMAT);
 
         // Operator is specified in config files.
         cfg.add("AutoPilotJob_Operator", "auto_pilot_job_operator.xml", ConfigManager.CONFIG_XML_FORMAT);
         cfg.add("AutoPilotJob_Operator.factory", "auto_pilot_job_operator_factory.xml",
-                ConfigManager.CONFIG_XML_FORMAT);
+            ConfigManager.CONFIG_XML_FORMAT);
 
         cfg.add("scheduler", "scheduler.xml", ConfigManager.CONFIG_XML_FORMAT);
         job = new AutoPilotJob();

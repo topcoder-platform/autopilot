@@ -324,8 +324,8 @@ public class ActiveAutoPilotSourceFailure extends TestCase {
                 throw new PersistenceException("test");
             }
         }, ActiveAutoPilotSource.DEFAULT_ACTIVE_STATUS_NAME,
-                ActiveAutoPilotSource.DEFAULT_EXTPROP_AUTOPILOTSWITCH,
-                ActiveAutoPilotSource.DEFAULT_EXTPROP_AUTOPILOTSWITCH_VALUE, LogManager.getLog());
+            ActiveAutoPilotSource.DEFAULT_EXTPROP_AUTOPILOTSWITCH,
+            ActiveAutoPilotSource.DEFAULT_EXTPROP_AUTOPILOTSWITCH_VALUE, LogManager.getLog());
 
         try {
             source.getProjectIds();

@@ -280,7 +280,7 @@ public class DefaultProjectPilotFailureTests extends FailureTestsHelper {
      * @throws Exception pass to JUnit.
      */
     public void testConstructor2ConfigNoProjectManagerKey()
-            throws Exception {
+        throws Exception {
         try {
             loadConfig();
             new DefaultProjectPilot(DefaultProjectPilot.class.getName(), "b", "c", "d", "e", null);
@@ -299,7 +299,7 @@ public class DefaultProjectPilotFailureTests extends FailureTestsHelper {
         try {
             loadConfig();
             new DefaultProjectPilot(DefaultProjectPilot.class.getName() + ".Loop", PhaseManager.class.getName(), "c",
-                    "d", "e", null);
+                "d", "e", null);
             fail("ConfigurationException should be thrown");
         } catch (ConfigurationException e) {
             assertTrue("Cause not as expected", e.getCause() instanceof IllegalReferenceException);
@@ -315,7 +315,7 @@ public class DefaultProjectPilotFailureTests extends FailureTestsHelper {
         try {
             loadConfig();
             new DefaultProjectPilot(DefaultProjectPilot.class.getName() + ".WrongType",
-                    PhaseManager.class.getName(), "c", "d", "e", null);
+                PhaseManager.class.getName(), "c", "d", "e", null);
             fail("ConfigurationException should be thrown");
         } catch (ConfigurationException e) {
             // ok
@@ -509,7 +509,7 @@ public class DefaultProjectPilotFailureTests extends FailureTestsHelper {
 
             EmptyDefaultProjectPilot projectPilot = new EmptyDefaultProjectPilot();
             MockPhase phase = new MockPhase(new Project(new Date(),
-                    new DefaultWorkdaysFactory().createWorkdaysInstance()), 100);
+                        new DefaultWorkdaysFactory().createWorkdaysInstance()), 100);
             phase.getPhaseStatus().setName(projectPilot.getOpenStatusName());
             MockPhaseManager.setCanEndException(true);
             projectPilot.processPhase(phase, new HashSet(), "operator");
@@ -530,7 +530,7 @@ public class DefaultProjectPilotFailureTests extends FailureTestsHelper {
 
             EmptyDefaultProjectPilot projectPilot = new EmptyDefaultProjectPilot();
             MockPhase phase = new MockPhase(new Project(new Date(),
-                    new DefaultWorkdaysFactory().createWorkdaysInstance()), 100);
+                        new DefaultWorkdaysFactory().createWorkdaysInstance()), 100);
             phase.getPhaseStatus().setName(projectPilot.getOpenStatusName());
             MockPhaseManager.setCanEndException(false);
             MockPhaseManager.setCanEnd(true);
@@ -554,7 +554,7 @@ public class DefaultProjectPilotFailureTests extends FailureTestsHelper {
 
             EmptyDefaultProjectPilot projectPilot = new EmptyDefaultProjectPilot();
             MockPhase phase = new MockPhase(new Project(new Date(),
-                    new DefaultWorkdaysFactory().createWorkdaysInstance()), 100);
+                        new DefaultWorkdaysFactory().createWorkdaysInstance()), 100);
             phase.getPhaseStatus().setName(projectPilot.getScheduledStatusName());
             MockPhaseManager.setCanStartException(true);
             projectPilot.processPhase(phase, new HashSet(), "operator");
@@ -575,7 +575,7 @@ public class DefaultProjectPilotFailureTests extends FailureTestsHelper {
 
             EmptyDefaultProjectPilot projectPilot = new EmptyDefaultProjectPilot();
             MockPhase phase = new MockPhase(new Project(new Date(),
-                    new DefaultWorkdaysFactory().createWorkdaysInstance()), 100);
+                        new DefaultWorkdaysFactory().createWorkdaysInstance()), 100);
             phase.getPhaseStatus().setName(projectPilot.getScheduledStatusName());
             MockPhaseManager.setCanStartException(false);
             MockPhaseManager.setCanStart(true);
@@ -599,7 +599,7 @@ public class DefaultProjectPilotFailureTests extends FailureTestsHelper {
 
             EmptyDefaultProjectPilot projectPilot = new EmptyDefaultProjectPilot();
             MockPhase phase = new MockPhase(new Project(new Date(),
-                    new DefaultWorkdaysFactory().createWorkdaysInstance()), 100);
+                        new DefaultWorkdaysFactory().createWorkdaysInstance()), 100);
             phase.getPhaseStatus().setName(projectPilot.getOpenStatusName());
             MockPhaseManager.setCanEndException(true);
             projectPilot.doPhaseOperation(phase, "operator");
@@ -620,7 +620,7 @@ public class DefaultProjectPilotFailureTests extends FailureTestsHelper {
 
             EmptyDefaultProjectPilot projectPilot = new EmptyDefaultProjectPilot();
             MockPhase phase = new MockPhase(new Project(new Date(),
-                    new DefaultWorkdaysFactory().createWorkdaysInstance()), 100);
+                        new DefaultWorkdaysFactory().createWorkdaysInstance()), 100);
             phase.getPhaseStatus().setName(projectPilot.getOpenStatusName());
             MockPhaseManager.setCanEndException(false);
             MockPhaseManager.setCanEnd(true);
@@ -639,13 +639,13 @@ public class DefaultProjectPilotFailureTests extends FailureTestsHelper {
      * @throws Exception pass to JUnit.
      */
     public void testDoPhaseOperationCanStartException()
-            throws Exception {
+        throws Exception {
         try {
             loadConfig();
 
             EmptyDefaultProjectPilot projectPilot = new EmptyDefaultProjectPilot();
             MockPhase phase = new MockPhase(new Project(new Date(),
-                    new DefaultWorkdaysFactory().createWorkdaysInstance()), 100);
+                        new DefaultWorkdaysFactory().createWorkdaysInstance()), 100);
             phase.getPhaseStatus().setName(projectPilot.getScheduledStatusName());
             MockPhaseManager.setCanStartException(true);
             projectPilot.doPhaseOperation(phase, "operator");
@@ -667,7 +667,7 @@ public class DefaultProjectPilotFailureTests extends FailureTestsHelper {
 
             EmptyDefaultProjectPilot projectPilot = new EmptyDefaultProjectPilot();
             MockPhase phase = new MockPhase(new Project(new Date(),
-                    new DefaultWorkdaysFactory().createWorkdaysInstance()), 100);
+                        new DefaultWorkdaysFactory().createWorkdaysInstance()), 100);
             phase.getPhaseStatus().setName(projectPilot.getScheduledStatusName());
             MockPhaseManager.setCanStartException(false);
             MockPhaseManager.setCanStart(true);
@@ -704,7 +704,7 @@ public class DefaultProjectPilotFailureTests extends FailureTestsHelper {
          * @throws PhaseOperationException if any error occurs while processing the phase.
          */
         public int[] processPhase(Phase phase, Set processedPhase, String operator)
-                throws PhaseOperationException {
+            throws PhaseOperationException {
             return super.processPhase(phase, processedPhase, operator);
         }
 
@@ -719,7 +719,7 @@ public class DefaultProjectPilotFailureTests extends FailureTestsHelper {
          * @throws PhaseOperationException if any error occurs while ending or starting the phase.
          */
         public int[] doPhaseOperation(Phase phase, String operator)
-                throws PhaseOperationException {
+            throws PhaseOperationException {
             return super.doPhaseOperation(phase, operator);
         }
 
@@ -733,7 +733,7 @@ public class DefaultProjectPilotFailureTests extends FailureTestsHelper {
          * @throws PhaseOperationException if any error occurs while auditing the entry.
          */
         public void doAudit(Phase phase, boolean isEnd, String operator)
-                throws PhaseOperationException {
+            throws PhaseOperationException {
             super.doAudit(phase, isEnd, operator);
         }
     }

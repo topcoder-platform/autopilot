@@ -44,7 +44,7 @@ public class DefaultProjectPilotTest extends TestCase {
     protected void setUp() throws Exception {
         ConfigManager cfg = ConfigManager.getInstance();
         cfg.add(DefaultProjectPilot.class.getName(), "project_pilot.xml",
-                ConfigManager.CONFIG_XML_FORMAT);
+            ConfigManager.CONFIG_XML_FORMAT);
         cfg.add("logging.xml");
         pilot = new DefaultProjectPilot();
     }
@@ -80,7 +80,7 @@ public class DefaultProjectPilotTest extends TestCase {
      */
     public void testDefaultProjectPilotStringStringStringStringString() throws Exception {
         pilot = new DefaultProjectPilot(DefaultProjectPilot.class.getName(), "ProjectPilot",
-                "Scheduled", "Open", "ProjectPilot", "");
+            "Scheduled", "Open", "ProjectPilot", "");
         assertTrue(pilot instanceof ProjectPilot);
     }
 
@@ -92,7 +92,7 @@ public class DefaultProjectPilotTest extends TestCase {
      */
     public void testDefaultProjectPilotPhaseManagerStringStringLog() throws Exception {
         pilot = new DefaultProjectPilot(new DefaultPhaseManager("phase_manager"), "Scheduled",
-                "Open", LogManager.getLog(), pilot.getProjectManager());
+            "Open", LogManager.getLog(), pilot.getProjectManager());
         assertTrue(pilot instanceof ProjectPilot);
     }
 
@@ -147,8 +147,8 @@ public class DefaultProjectPilotTest extends TestCase {
      */
     public void testAdvancePhases2() throws Exception {
         pilot = new DefaultProjectPilot(new DefaultPhaseManager2("pm2"),
-                DefaultProjectPilot.DEFAULT_SCHEDULED_STATUS_NAME,
-                DefaultProjectPilot.DEFAULT_OPEN_STATUS_NAME, LogManager.getLog("ProjetPilot"), pilot.getProjectManager());
+            DefaultProjectPilot.DEFAULT_SCHEDULED_STATUS_NAME,
+            DefaultProjectPilot.DEFAULT_OPEN_STATUS_NAME, LogManager.getLog("ProjetPilot"), pilot.getProjectManager());
 
         AutoPilotResult result = pilot.advancePhases(1, "Check");
         assertEquals(1, result.getProjectId());
@@ -163,8 +163,8 @@ public class DefaultProjectPilotTest extends TestCase {
      */
     public void testAdvancePhasesNullPhases() throws Exception {
         pilot = new DefaultProjectPilot(new DefaultPhaseManager3(),
-                DefaultProjectPilot.DEFAULT_SCHEDULED_STATUS_NAME,
-                DefaultProjectPilot.DEFAULT_OPEN_STATUS_NAME, LogManager.getLog("ProjetPilot"), pilot.getProjectManager());
+            DefaultProjectPilot.DEFAULT_SCHEDULED_STATUS_NAME,
+            DefaultProjectPilot.DEFAULT_OPEN_STATUS_NAME, LogManager.getLog("ProjetPilot"), pilot.getProjectManager());
 
         AutoPilotResult result = pilot.advancePhases(2, "Check");
         assertEquals(2, result.getProjectId());
@@ -179,8 +179,8 @@ public class DefaultProjectPilotTest extends TestCase {
      */
     public void testAdvancePhasesEmptyPhases() throws Exception {
         pilot = new DefaultProjectPilot(new DefaultPhaseManager3(),
-                DefaultProjectPilot.DEFAULT_SCHEDULED_STATUS_NAME,
-                DefaultProjectPilot.DEFAULT_OPEN_STATUS_NAME, LogManager.getLog("ProjetPilot"), pilot.getProjectManager());
+            DefaultProjectPilot.DEFAULT_SCHEDULED_STATUS_NAME,
+            DefaultProjectPilot.DEFAULT_OPEN_STATUS_NAME, LogManager.getLog("ProjetPilot"), pilot.getProjectManager());
 
         AutoPilotResult result = pilot.advancePhases(1, "Check");
         assertEquals(1, result.getProjectId());
@@ -196,7 +196,7 @@ public class DefaultProjectPilotTest extends TestCase {
      */
     public void testProcessPhase() throws Exception {
         int[] result = pilot.processPhase(pilot.getPhaseManager().getPhases(1).getAllPhases()[0],
-                new HashSet(), "Check");
+            new HashSet(), "Check");
         assertEquals(2, result.length);
         assertEquals(0, result[0]);
         assertEquals(0, result[1]);
@@ -210,7 +210,7 @@ public class DefaultProjectPilotTest extends TestCase {
      */
     public void testDoPhaseOperation() throws Exception {
         int[] result = pilot.doPhaseOperation(
-                pilot.getPhaseManager().getPhases(1).getAllPhases()[0], "Check");
+            pilot.getPhaseManager().getPhases(1).getAllPhases()[0], "Check");
         assertEquals(2, result.length);
         assertEquals(0, result[0]);
         assertEquals(0, result[1]);
@@ -224,8 +224,8 @@ public class DefaultProjectPilotTest extends TestCase {
      */
     public void testDoPhaseOperationNullStatus() throws Exception {
         pilot = new DefaultProjectPilot(new DefaultPhaseManager3(),
-                DefaultProjectPilot.DEFAULT_SCHEDULED_STATUS_NAME,
-                DefaultProjectPilot.DEFAULT_OPEN_STATUS_NAME, LogManager.getLog("ProjetPilot"), pilot.getProjectManager());
+            DefaultProjectPilot.DEFAULT_SCHEDULED_STATUS_NAME,
+            DefaultProjectPilot.DEFAULT_OPEN_STATUS_NAME, LogManager.getLog("ProjetPilot"), pilot.getProjectManager());
 
         int[] result = pilot.doPhaseOperation(new Phase(pilot.getPhaseManager().getPhases(1), 0), "Check");
         assertEquals(2, result.length);
@@ -252,8 +252,8 @@ public class DefaultProjectPilotTest extends TestCase {
      */
     public void testDoAuditNullType() throws Exception {
         pilot = new DefaultProjectPilot(new DefaultPhaseManager3(),
-                DefaultProjectPilot.DEFAULT_SCHEDULED_STATUS_NAME,
-                DefaultProjectPilot.DEFAULT_OPEN_STATUS_NAME, LogManager.getLog("ProjetPilot"), pilot.getProjectManager());
+            DefaultProjectPilot.DEFAULT_SCHEDULED_STATUS_NAME,
+            DefaultProjectPilot.DEFAULT_OPEN_STATUS_NAME, LogManager.getLog("ProjetPilot"), pilot.getProjectManager());
 
         pilot.doAudit(new Phase(pilot.getPhaseManager().getPhases(1), 0), true, "Check");
     }

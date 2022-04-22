@@ -121,7 +121,7 @@ public class InformixProjectPersistence implements ProjectPersistence {
      * @throws PersistenceException if cannot initialize the connection to the database.
      */
     public InformixProjectPersistence(String namespace) throws ConfigurationException,
-            PersistenceException {
+        PersistenceException {
         // your code here
     }
 
@@ -171,7 +171,7 @@ public class InformixProjectPersistence implements ProjectPersistence {
      * @throws PersistenceException if error occurred while accessing the database.
      */
     public void updateProject(Project project, String reason, String operator)
-            throws PersistenceException {
+        throws PersistenceException {
         // your code here
     }
 

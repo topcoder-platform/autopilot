@@ -45,7 +45,7 @@ public class MockProjectManager implements ProjectManager {
      * @throws ValidationException never.
      */
     public void createProject(Project project, String operator)
-            throws PersistenceException, ValidationException {
+        throws PersistenceException, ValidationException {
     }
 
     /**
@@ -59,7 +59,7 @@ public class MockProjectManager implements ProjectManager {
      * @throws ValidationException never.
      */
     public void updateProject(Project project, String reason, String operator)
-            throws PersistenceException, ValidationException {
+        throws PersistenceException, ValidationException {
     }
 
     /**
@@ -140,7 +140,7 @@ public class MockProjectManager implements ProjectManager {
      * @throws PersistenceException never.
      */
     public ProjectCategory[] getAllProjectCategories()
-            throws PersistenceException {
+        throws PersistenceException {
         return null;
     }
 
@@ -163,7 +163,7 @@ public class MockProjectManager implements ProjectManager {
      * @throws PersistenceException never.
      */
     public ProjectPropertyType[] getAllProjectPropertyTypes()
-            throws PersistenceException {
+        throws PersistenceException {
         return null;
     }
 

@@ -39,7 +39,7 @@ public class ActiveAutoPilotSourceTest extends TestCase {
     protected void setUp() throws Exception {
         ConfigManager cfg = ConfigManager.getInstance();
         cfg.add(ActiveAutoPilotSource.class.getName(), "active_auto_source_pilot.xml",
-                ConfigManager.CONFIG_XML_FORMAT);
+            ConfigManager.CONFIG_XML_FORMAT);
         source = new ActiveAutoPilotSource();
     }
 
@@ -75,7 +75,7 @@ public class ActiveAutoPilotSourceTest extends TestCase {
      */
     public void testActiveAutoPilotSourceStringStringStringStringString() throws Exception {
         source = new ActiveAutoPilotSource(ActiveAutoPilotSource.class.getName(), "ProjectManager",
-                "Active", "Autopilot Option", "On");
+            "Active", "Autopilot Option", "On");
         assertTrue(source instanceof AutoPilotSource);
         assertTrue(source.getProjectManager() instanceof ProjectManagerImpl);
     }
@@ -88,7 +88,7 @@ public class ActiveAutoPilotSourceTest extends TestCase {
      */
     public void testActiveAutoPilotSourceProjectManagerStringStringString() throws Exception {
         source = new ActiveAutoPilotSource(new ProjectManagerImpl("project_manager"), "Active",
-                "Autopilot Option", "On", LogManager.getLog());
+            "Autopilot Option", "On", LogManager.getLog());
         assertTrue(source instanceof AutoPilotSource);
         assertTrue(source.getProjectManager() instanceof ProjectManagerImpl);
     }
