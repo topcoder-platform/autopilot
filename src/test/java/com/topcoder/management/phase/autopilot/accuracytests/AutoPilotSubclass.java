@@ -44,7 +44,7 @@ class AutoPilotSubclass extends AutoPilot {
      * project pilot instance
      */
     public AutoPilotSubclass(String namespace, String autoPilotSourceKey, String projectPilotKey)
-            throws ConfigurationException {
+        throws ConfigurationException {
         super(namespace, autoPilotSourceKey, projectPilotKey);
     }
 

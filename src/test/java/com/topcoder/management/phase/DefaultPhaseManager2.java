@@ -288,17 +288,13 @@ public class DefaultPhaseManager2 implements PhaseManager {
     public OperationCheckResult canStart(Phase phase) throws PhaseManagementException {
         // your code here
         if (phase.getId() == 1) {
-            return new OperationCheckResult("error");
+            return new OperationCheckResult("fail");
         } else if (phase.getId() == 2) {
-            return new OperationCheckResult("error");
+            return new OperationCheckResult("fail");
         } else if (phase.getId() == 3) {
-            if (phases[1].getPhaseStatus().equals(PhaseStatus.CLOSED)) {
-                return new OperationCheckResult(true, null);
-            } else {
-                return new OperationCheckResult("error");
-            }
+            return new OperationCheckResult((phases[1].getPhaseStatus().equals(PhaseStatus.CLOSED)), null);
         }
-        return new OperationCheckResult("error");
+        return new OperationCheckResult("fail");
     }
 
     /**
@@ -336,13 +332,13 @@ public class DefaultPhaseManager2 implements PhaseManager {
     public OperationCheckResult canEnd(Phase phase) throws PhaseManagementException {
         // your code here
         if (phase.getId() == 1) {
-            return new OperationCheckResult("error");
+            return new OperationCheckResult("fail");
         } else if (phase.getId() == 2) {
             return new OperationCheckResult(true, null);
         } else if (phase.getId() == 3) {
-            return new OperationCheckResult("error");
+            return new OperationCheckResult("fail");
         }
-        return new OperationCheckResult("error");
+        return new OperationCheckResult("fail");
     }
 
     /**

@@ -67,7 +67,7 @@ public class AutoPilotJobAccuracyTest extends TestCase {
         this.testedInstances = new AutoPilotJob[3];
         this.testedInstances[0] = new AutoPilotJob();
         this.testedInstances[1] = new AutoPilotJob(TestDataFactory.AUTO_PILOT_JOB_NAMESPACE,
-                AutoPilot.class.getName());
+                                                   AutoPilot.class.getName());
         this.testedInstances[2] = new AutoPilotJob(TestDataFactory.getAutoPilot().toString(), TestDataFactory.OPERATOR);
     }
 
@@ -91,9 +91,9 @@ public class AutoPilotJobAccuracyTest extends TestCase {
      */
     public void testConstructor_AutoPilotJob() throws Exception {
         Assert.assertEquals("The auto-pilot is not correct.",
-                TestDataFactory.getAutoPilot(), this.testedInstances[0].getAutoPilot());
+                            TestDataFactory.getAutoPilot(), this.testedInstances[0].getAutoPilot());
         Assert.assertEquals("The operator is not correct.",
-                TestDataFactory.OPERATOR, this.testedInstances[0].getOperator());
+                            TestDataFactory.OPERATOR, this.testedInstances[0].getOperator());
     }
 
     /**
@@ -106,7 +106,7 @@ public class AutoPilotJobAccuracyTest extends TestCase {
      */
     public void testConstructor_AutoPilotJob_String_String() throws Exception {
         Assert.assertEquals("The auto-pilot is not correct.",
-                TestDataFactory.getAutoPilot(), this.testedInstances[1].getAutoPilot());
+                            TestDataFactory.getAutoPilot(), this.testedInstances[1].getAutoPilot());
         Assert.assertEquals("The operator is not correct.",
                 TestDataFactory.OPERATOR, this.testedInstances[1].getOperator());
     }
@@ -121,9 +121,9 @@ public class AutoPilotJobAccuracyTest extends TestCase {
      */
     public void testConstructor_AutoPilotJob_AutoPilot_String() throws Exception {
         Assert.assertEquals("The auto-pilot is not correct.",
-                TestDataFactory.getAutoPilot(), this.testedInstances[2].getAutoPilot());
+                            TestDataFactory.getAutoPilot(), this.testedInstances[2].getAutoPilot());
         Assert.assertEquals("The operator is not correct.",
-                TestDataFactory.OPERATOR, this.testedInstances[2].getOperator());
+                            TestDataFactory.OPERATOR, this.testedInstances[2].getOperator());
     }
 
     /**

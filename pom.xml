@@ -130,5 +130,52 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>3.2.0</version>
+                <executions>
+                    <execution>
+                        <id>copy-resource-one</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${basedir}/target/classes</outputDirectory>
+                            <filters>
+                                <filter>token.properties</filter>
+                            </filters>
+                            <resources>
+                                <resource>
+                                    <directory>scripts</directory>
+                                    <filtering>true</filtering>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.0.0</version>
+                <configuration>
+                    <mainClass>com.topcoder.management.phase.autopilot.AutoPilotUtility</mainClass>
+                    <arguments>
+                        <argument>-config</argument>
+                        <argument>auto_pilot.xml</argument>
+                        <argument>-namespace</argument>
+                        <argument>AutoPilotJob</argument>
+                        <argument>-autopilot</argument>
+                        <argument>com.topcoder.management.phase.autopilot.AutoPilot</argument>
+                        <argument>-poll</argument>
+                        <argument>20</argument>
+                    </arguments>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>

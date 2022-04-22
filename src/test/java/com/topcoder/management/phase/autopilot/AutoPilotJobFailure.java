@@ -47,9 +47,9 @@ public class AutoPilotJobFailure extends TestCase {
     private AutoPilot createAutoPilot() throws Exception {
         ConfigManager cfg = ConfigManager.getInstance();
         cfg.add(ActiveAutoPilotSource.class.getName(), "active_auto_source_pilot.xml",
-                ConfigManager.CONFIG_XML_FORMAT);
+            ConfigManager.CONFIG_XML_FORMAT);
         cfg.add(DefaultProjectPilot.class.getName(), "project_pilot.xml",
-                ConfigManager.CONFIG_XML_FORMAT);
+            ConfigManager.CONFIG_XML_FORMAT);
         cfg.add("logging.xml");
         cfg.add(AutoPilot.class.getName(), "auto_pilot.xml", ConfigManager.CONFIG_XML_FORMAT);
         return new AutoPilot();
@@ -69,14 +69,14 @@ public class AutoPilotJobFailure extends TestCase {
 
         ConfigManager cfg = ConfigManager.getInstance();
         cfg.add(ActiveAutoPilotSource.class.getName(), "active_auto_source_pilot.xml",
-                ConfigManager.CONFIG_XML_FORMAT);
+            ConfigManager.CONFIG_XML_FORMAT);
         cfg.add(DefaultProjectPilot.class.getName(), "project_pilot.xml",
-                ConfigManager.CONFIG_XML_FORMAT);
+            ConfigManager.CONFIG_XML_FORMAT);
         cfg.add("logging.xml");
         cfg.add(AutoPilot.class.getName(), "auto_pilot.xml", ConfigManager.CONFIG_XML_FORMAT);
         cfg.add(AutoPilotJob.class.getName(), "auto_pilot_job.xml", ConfigManager.CONFIG_XML_FORMAT);
         cfg.add(AutoPilotJob.class.getName() + AutoPilotJob.OBJECT_FACTORY_POSTFIX,
-                "auto_pilot_job_factory.xml", ConfigManager.CONFIG_XML_FORMAT);
+            "auto_pilot_job_factory.xml", ConfigManager.CONFIG_XML_FORMAT);
         cfg.add("scheduler", "scheduler.xml", ConfigManager.CONFIG_XML_FORMAT);
         return new AutoPilotJob();
     }
@@ -203,7 +203,7 @@ public class AutoPilotJobFailure extends TestCase {
             createAutoPilotJob();
             AutoPilot autoPilot = new AutoPilot() {
                 public AutoPilotResult[] advanceProjects(String operator)
-                        throws AutoPilotSourceException, PhaseOperationException {
+                    throws AutoPilotSourceException, PhaseOperationException {
                     throw new AutoPilotSourceException("test");
                 }
             };
@@ -228,7 +228,7 @@ public class AutoPilotJobFailure extends TestCase {
             createAutoPilotJob();
             AutoPilot autoPilot = new AutoPilot() {
                 public AutoPilotResult[] advanceProjects(String operator)
-                        throws AutoPilotSourceException, PhaseOperationException {
+                    throws AutoPilotSourceException, PhaseOperationException {
                     throw new PhaseOperationException(-1, null, "test");
                 }
             };

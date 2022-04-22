@@ -115,15 +115,15 @@ public class DefaultProjectPilotAccuracyTest extends TestCase {
         this.testedInstances = new DefaultProjectPilotSubclass[3];
         this.testedInstances[0] = new DefaultProjectPilotSubclass();
         this.testedInstances[1] = new DefaultProjectPilotSubclass(TestDataFactory.DEFAULT_PROJECT_PILOT_NAMESPACE,
-                TestDataFactory.PHASE_MANAGER_CONFIG_PROPERTY,
-                TestDataFactory.SCHEDULED_PHASE_STATUS,
-                TestDataFactory.OPEN_PHASE_STATUS,
-                TestDataFactory.LOG_NAME,
+                                                                  TestDataFactory.PHASE_MANAGER_CONFIG_PROPERTY,
+                                                                  TestDataFactory.SCHEDULED_PHASE_STATUS,
+                                                                  TestDataFactory.OPEN_PHASE_STATUS,
+                                                                  TestDataFactory.LOG_NAME,
                 TestDataFactory.PROJECT_MANAGER_CONFIG_PROPERTY);
         this.testedInstances[2] = new DefaultProjectPilotSubclass(TestDataFactory.getPhaseManager(),
-                TestDataFactory.SCHEDULED_PHASE_STATUS,
-                TestDataFactory.OPEN_PHASE_STATUS,
-                TestDataFactory.getLog(),
+                                                                  TestDataFactory.SCHEDULED_PHASE_STATUS,
+                                                                  TestDataFactory.OPEN_PHASE_STATUS,
+                                                                  TestDataFactory.getLog(),
                 TestDataFactory.getProjectManager());
     }
 
@@ -149,15 +149,15 @@ public class DefaultProjectPilotAccuracyTest extends TestCase {
      */
     public void testConstructor_DefaultProjectPilot_() {
         Assert.assertEquals("The scheduled phase status name is not correct.",
-                DefaultProjectPilot.DEFAULT_SCHEDULED_STATUS_NAME,
-                this.testedInstances[0].getScheduledStatusName());
+                            DefaultProjectPilot.DEFAULT_SCHEDULED_STATUS_NAME,
+                            this.testedInstances[0].getScheduledStatusName());
         Assert.assertEquals("The open phase status name is not correct.",
-                DefaultProjectPilot.DEFAULT_OPEN_STATUS_NAME,
-                this.testedInstances[0].getOpenStatusName());
+                            DefaultProjectPilot.DEFAULT_OPEN_STATUS_NAME,
+                            this.testedInstances[0].getOpenStatusName());
         Assert.assertEquals("The logger is not correct.",
-                TestDataFactory.getLog(), this.testedInstances[0].getLogger());
+                            TestDataFactory.getLog(), this.testedInstances[0].getLogger());
         Assert.assertEquals("The phase manager is not correct.",
-                TestDataFactory.getPhaseManager(), this.testedInstances[0].getPhaseManager());
+                            TestDataFactory.getPhaseManager(), this.testedInstances[0].getPhaseManager());
     }
 
     /**
@@ -171,13 +171,13 @@ public class DefaultProjectPilotAccuracyTest extends TestCase {
      */
     public void testConstructor_DefaultProjectPilot_String_String_String_String_String_() {
         Assert.assertEquals("The scheduled phase status name is not correct.",
-                TestDataFactory.SCHEDULED_PHASE_STATUS, this.testedInstances[1].getScheduledStatusName());
+                            TestDataFactory.SCHEDULED_PHASE_STATUS, this.testedInstances[1].getScheduledStatusName());
         Assert.assertEquals("The open phase status name is not correct.",
-                TestDataFactory.OPEN_PHASE_STATUS, this.testedInstances[1].getOpenStatusName());
+                            TestDataFactory.OPEN_PHASE_STATUS, this.testedInstances[1].getOpenStatusName());
         Assert.assertEquals("The logger is not correct.",
-                TestDataFactory.getAlternateLog(), this.testedInstances[1].getLogger());
+                            TestDataFactory.getAlternateLog(), this.testedInstances[1].getLogger());
         Assert.assertEquals("The phase manager is not correct.",
-                TestDataFactory.getAlternatePhaseManager(), this.testedInstances[1].getPhaseManager());
+                            TestDataFactory.getAlternatePhaseManager(), this.testedInstances[1].getPhaseManager());
     }
 
     /**
@@ -191,13 +191,13 @@ public class DefaultProjectPilotAccuracyTest extends TestCase {
      */
     public void testConstructor_DefaultProjectPilot_PhaseManager_String_String_Log_() {
         Assert.assertEquals("The scheduled phase status name is not correct.",
-                TestDataFactory.SCHEDULED_PHASE_STATUS, this.testedInstances[2].getScheduledStatusName());
+                            TestDataFactory.SCHEDULED_PHASE_STATUS, this.testedInstances[2].getScheduledStatusName());
         Assert.assertEquals("The open phase status name is not correct.",
-                TestDataFactory.OPEN_PHASE_STATUS, this.testedInstances[2].getOpenStatusName());
+                            TestDataFactory.OPEN_PHASE_STATUS, this.testedInstances[2].getOpenStatusName());
         Assert.assertEquals("The logger is not correct.",
-                TestDataFactory.getLog(), this.testedInstances[2].getLogger());
+                            TestDataFactory.getLog(), this.testedInstances[2].getLogger());
         Assert.assertEquals("The phase manager is not correct.",
-                TestDataFactory.getPhaseManager(), this.testedInstances[2].getPhaseManager());
+                            TestDataFactory.getPhaseManager(), this.testedInstances[2].getPhaseManager());
     }
 
     /**
@@ -281,7 +281,7 @@ public class DefaultProjectPilotAccuracyTest extends TestCase {
             MockLog.releaseState();
             MockLog.init();
             int[] result = this.testedInstances[i].doPhaseOperation(TestDataFactory.getClosedPhase(TestDataFactory.getPhaseProject()),
-                    TestDataFactory.OPERATOR);
+                                                                    TestDataFactory.OPERATOR);
             assertPhaseProcessResults(ARRAY_00, result, false, false);
         }
     }
@@ -297,7 +297,7 @@ public class DefaultProjectPilotAccuracyTest extends TestCase {
         configurePhaseManager(true, true);
         for (int i = 0; i < this.testedInstances.length; i++) {
             int[] result = this.testedInstances[i].doPhaseOperation(TestDataFactory.getPhaseWithNullStatus(TestDataFactory.getPhaseProject()),
-                    TestDataFactory.OPERATOR);
+                                                                    TestDataFactory.OPERATOR);
             assertPhaseProcessResults(ARRAY_00, result, false, false);
         }
     }
@@ -313,7 +313,7 @@ public class DefaultProjectPilotAccuracyTest extends TestCase {
         configurePhaseManager(true, true);
         for (int i = 0; i < this.testedInstances.length; i++) {
             int[] result = this.testedInstances[i].doPhaseOperation(TestDataFactory.getOpenPhase(TestDataFactory.getPhaseProject()),
-                    TestDataFactory.OPERATOR);
+                                                                    TestDataFactory.OPERATOR);
             assertPhaseProcessResults(ARRAY_10, result, true, false);
         }
     }
@@ -329,7 +329,7 @@ public class DefaultProjectPilotAccuracyTest extends TestCase {
         configurePhaseManager(false, true);
         for (int i = 0; i < this.testedInstances.length; i++) {
             int result[] = this.testedInstances[i].doPhaseOperation(TestDataFactory.getOpenPhase(TestDataFactory.getPhaseProject()),
-                    TestDataFactory.OPERATOR);
+                                                                    TestDataFactory.OPERATOR);
             assertPhaseProcessResults(ARRAY_00, result, false, false);
         }
     }
@@ -345,7 +345,7 @@ public class DefaultProjectPilotAccuracyTest extends TestCase {
         configurePhaseManager(true, true);
         for (int i = 0; i < this.testedInstances.length; i++) {
             int[] result = this.testedInstances[i].doPhaseOperation(TestDataFactory.getScheduledPhase(TestDataFactory.getPhaseProject()),
-                    TestDataFactory.OPERATOR);
+                                                                    TestDataFactory.OPERATOR);
             assertPhaseProcessResults(ARRAY_01, result, false, true);
         }
     }
@@ -361,7 +361,7 @@ public class DefaultProjectPilotAccuracyTest extends TestCase {
         for (int i = 0; i < this.testedInstances.length; i++) {
             configurePhaseManager(true, false);
             int[] result = this.testedInstances[i].doPhaseOperation(TestDataFactory.getScheduledPhase(TestDataFactory.getPhaseProject()),
-                    TestDataFactory.OPERATOR);
+                                                                    TestDataFactory.OPERATOR);
             assertPhaseProcessResults(ARRAY_00, result, false, false);
         }
     }
@@ -390,8 +390,8 @@ public class DefaultProjectPilotAccuracyTest extends TestCase {
         configurePhaseManager(true, true);
         for (int i = 0; i < this.testedInstances.length; i++) {
             int[] result = this.testedInstances[i].processPhase(TestDataFactory.getProcessedPhase(TestDataFactory.getPhaseProject()),
-                    TestDataFactory.getProcessedPhases(),
-                    TestDataFactory.OPERATOR);
+                                                                TestDataFactory.getProcessedPhases(),
+                                                                TestDataFactory.OPERATOR);
             assertPhaseProcessResults(ARRAY_00, result, false, false);
         }
     }
@@ -407,7 +407,7 @@ public class DefaultProjectPilotAccuracyTest extends TestCase {
         configurePhaseManager(true, true);
         for (int i = 0; i < this.testedInstances.length; i++) {
             int[] result = this.testedInstances[i].processPhase(TestDataFactory.getOpenPhase(TestDataFactory.getPhaseProject()),
-                    new HashSet(), TestDataFactory.OPERATOR);
+                                                                new HashSet(), TestDataFactory.OPERATOR);
             assertPhaseProcessResults(ARRAY_10, result, true, false);
         }
     }
@@ -423,7 +423,7 @@ public class DefaultProjectPilotAccuracyTest extends TestCase {
         configurePhaseManager(false, true);
         for (int i = 0; i < this.testedInstances.length; i++) {
             int[] result = this.testedInstances[i].processPhase(TestDataFactory.getOpenPhase(TestDataFactory.getPhaseProject()),
-                    new HashSet(), TestDataFactory.OPERATOR);
+                                                                new HashSet(), TestDataFactory.OPERATOR);
             assertPhaseProcessResults(ARRAY_00, result, false, false);
         }
     }
@@ -439,7 +439,7 @@ public class DefaultProjectPilotAccuracyTest extends TestCase {
         configurePhaseManager(true, true);
         for (int i = 0; i < this.testedInstances.length; i++) {
             int[] result = this.testedInstances[i].processPhase(TestDataFactory.getScheduledPhase(TestDataFactory.getPhaseProject()),
-                    new HashSet(), TestDataFactory.OPERATOR);
+                                                                new HashSet(), TestDataFactory.OPERATOR);
             assertPhaseProcessResults(ARRAY_01, result, false, true);
         }
     }
@@ -455,7 +455,7 @@ public class DefaultProjectPilotAccuracyTest extends TestCase {
         configurePhaseManager(true, false);
         for (int i = 0; i < this.testedInstances.length; i++) {
             int[] result = this.testedInstances[i].processPhase(TestDataFactory.getScheduledPhase(TestDataFactory.getPhaseProject()),
-                    new HashSet(), TestDataFactory.OPERATOR);
+                                                                new HashSet(), TestDataFactory.OPERATOR);
             assertPhaseProcessResults(ARRAY_00, result, false, false);
         }
     }
@@ -471,8 +471,8 @@ public class DefaultProjectPilotAccuracyTest extends TestCase {
         configurePhaseManager(true, true);
         for (int i = 0; i < this.testedInstances.length; i++) {
             int[] result = this.testedInstances[i].processPhase(TestDataFactory.getProcessedPhase(TestDataFactory.getPhaseProject()),
-                    TestDataFactory.getProcessedPhases(),
-                    TestDataFactory.OPERATOR);
+                                                                TestDataFactory.getProcessedPhases(),
+                                                                TestDataFactory.OPERATOR);
             assertPhaseProcessResults(ARRAY_00, result, false, false);
         }
     }
@@ -488,7 +488,7 @@ public class DefaultProjectPilotAccuracyTest extends TestCase {
         configurePhaseManager(true, true);
         for (int i = 0; i < this.testedInstances.length; i++) {
             int[] result = this.testedInstances[i].processPhase(TestDataFactory.getOpenPhase(TestDataFactory.getPhaseProject()),
-                    new HashSet(), TestDataFactory.OPERATOR);
+                                                                new HashSet(), TestDataFactory.OPERATOR);
             assertPhaseProcessResults(ARRAY_10, result, true, false);
         }
     }
@@ -504,7 +504,7 @@ public class DefaultProjectPilotAccuracyTest extends TestCase {
         configurePhaseManager(false, true);
         for (int i = 0; i < this.testedInstances.length; i++) {
             int[] result = this.testedInstances[i].processPhase(TestDataFactory.getOpenPhase(TestDataFactory.getPhaseProject()),
-                    new HashSet(), TestDataFactory.OPERATOR);
+                                                                new HashSet(), TestDataFactory.OPERATOR);
             assertPhaseProcessResults(ARRAY_00, result, false, false);
         }
     }
@@ -520,7 +520,7 @@ public class DefaultProjectPilotAccuracyTest extends TestCase {
         configurePhaseManager(true, true);
         for (int i = 0; i < this.testedInstances.length; i++) {
             int[] result = this.testedInstances[i].processPhase(TestDataFactory.getScheduledPhase(TestDataFactory.getPhaseProject()),
-                    new HashSet(), TestDataFactory.OPERATOR);
+                                                                new HashSet(), TestDataFactory.OPERATOR);
             assertPhaseProcessResults(ARRAY_01, result, false, true);
         }
     }
@@ -536,7 +536,7 @@ public class DefaultProjectPilotAccuracyTest extends TestCase {
         configurePhaseManager(true, false);
         for (int i = 0; i < this.testedInstances.length; i++) {
             int[] result = this.testedInstances[i].processPhase(TestDataFactory.getScheduledPhase(TestDataFactory.getPhaseProject()),
-                    new HashSet(), TestDataFactory.OPERATOR);
+                                                                new HashSet(), TestDataFactory.OPERATOR);
             assertPhaseProcessResults(ARRAY_00, result, false, false);
         }
     }
@@ -568,11 +568,11 @@ public class DefaultProjectPilotAccuracyTest extends TestCase {
         }
 
         Assert.assertEquals("The logged project ID is not correct",
-                "project " + phase.getProject().getId(), parts[1].trim());
+                            "project " + phase.getProject().getId(), parts[1].trim());
         Assert.assertEquals("The logged phase ID and type are not correct",
-                ("phase type " + (phase.getPhaseType() == null ? "Null phase type"
-                        : phase.getPhaseType().getName())).toUpperCase(),
-                parts[3].trim().toUpperCase());
+                            ("phase type " + (phase.getPhaseType() == null ? "Null phase type"
+                            : phase.getPhaseType().getName())).toUpperCase(),
+                            parts[3].trim().toUpperCase());
         Assert.assertEquals("The logged action is not correct", isEnd ? "END" : "START", parts[4].trim());
         Assert.assertEquals("The logged operator is not correct", "operator " + operator, parts[5].trim());
     }

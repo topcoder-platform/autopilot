@@ -243,10 +243,10 @@ public class MockPhaseManager implements PhaseManager {
         }
         args.add(arguments);
 
-        if ((Boolean) MockPhaseManager.methodResults.get(methodName)) {
+        if ((boolean)MockPhaseManager.methodResults.get(methodName)) {
             return new OperationCheckResult(true, null);
         } else {
-            return new OperationCheckResult("error");
+            return new OperationCheckResult("fail");
         }
 
     }
@@ -311,11 +311,10 @@ public class MockPhaseManager implements PhaseManager {
             MockPhaseManager.methodArguments.put(methodName, args);
         }
         args.add(arguments);
-
-        if ((Boolean) MockPhaseManager.methodResults.get(methodName)){
+        if ((Boolean) MockPhaseManager.methodResults.get(methodName)) {
             return new OperationCheckResult(true, null);
         } else {
-            return new OperationCheckResult("error");
+            return new OperationCheckResult("fail");
         }
     }
 

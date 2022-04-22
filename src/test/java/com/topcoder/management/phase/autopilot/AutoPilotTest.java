@@ -40,9 +40,9 @@ public class AutoPilotTest extends TestCase {
     protected void setUp() throws Exception {
         ConfigManager cfg = ConfigManager.getInstance();
         cfg.add(ActiveAutoPilotSource.class.getName(), "active_auto_source_pilot.xml",
-                ConfigManager.CONFIG_XML_FORMAT);
+            ConfigManager.CONFIG_XML_FORMAT);
         cfg.add(DefaultProjectPilot.class.getName(), "project_pilot.xml",
-                ConfigManager.CONFIG_XML_FORMAT);
+            ConfigManager.CONFIG_XML_FORMAT);
         cfg.add("logging.xml");
         cfg.add(AutoPilot.class.getName(), "auto_pilot.xml", ConfigManager.CONFIG_XML_FORMAT);
         autoPilot = new AutoPilot();
@@ -78,7 +78,7 @@ public class AutoPilotTest extends TestCase {
      */
     public void testAutoPilotStringStringString() throws Exception {
         autoPilot = new AutoPilot(AutoPilot.class.getName(), AutoPilotSource.class.getName(),
-                ProjectPilot.class.getName());
+            ProjectPilot.class.getName());
         assertTrue(autoPilot instanceof AutoPilot);
     }
 
@@ -147,10 +147,10 @@ public class AutoPilotTest extends TestCase {
      */
     private void createAutoPilot2() throws Exception {
         AutoPilotSource autoPilotSource = new ActiveAutoPilotSource(new ProjectManagerImpl2(
-                "project_manager"), "Active", "Autopilot Option", "On", LogManager.getLog());
+            "project_manager"), "Active", "Autopilot Option", "On", LogManager.getLog());
         ProjectPilot projectPilot = new DefaultProjectPilot(new DefaultPhaseManager2("pm2"),
-                DefaultProjectPilot.DEFAULT_SCHEDULED_STATUS_NAME,
-                DefaultProjectPilot.DEFAULT_OPEN_STATUS_NAME, LogManager.getLog("ProjetPilot"), null);
+            DefaultProjectPilot.DEFAULT_SCHEDULED_STATUS_NAME,
+            DefaultProjectPilot.DEFAULT_OPEN_STATUS_NAME, LogManager.getLog("ProjetPilot"), null);
         autoPilot = new AutoPilot(autoPilotSource, projectPilot, LogManager.getLog());
     }
 
@@ -171,7 +171,7 @@ public class AutoPilotTest extends TestCase {
      */
     public void testAdvanceProjectsLongArrayString() throws Exception {
         AutoPilotResult[] results = autoPilot.advanceProjects(autoPilot.getAutoPilotSource()
-                .getProjectIds(), "Check");
+            .getProjectIds(), "Check");
         assertEquals(5, results.length);
         for (int i = 0; i < results.length; i++) {
             assertTrue(results[i].getProjectId() <= 5);
@@ -189,7 +189,7 @@ public class AutoPilotTest extends TestCase {
         createAutoPilot2();
 
         AutoPilotResult[] results = autoPilot.advanceProjects(autoPilot.getAutoPilotSource()
-                .getProjectIds(), "Check");
+            .getProjectIds(), "Check");
         assertEquals(1, results.length);
         assertEquals(results[0].getProjectId(), 1);
         assertEquals(1, results[0].getPhaseEndedCount());

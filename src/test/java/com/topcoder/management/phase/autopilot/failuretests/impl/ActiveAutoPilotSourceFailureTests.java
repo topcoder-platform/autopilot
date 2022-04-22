@@ -266,7 +266,7 @@ public class ActiveAutoPilotSourceFailureTests extends FailureTestsHelper {
      * @throws Exception pass to JUnit.
      */
     public void testConstructor2ConfigNoProjectManagerKey()
-            throws Exception {
+        throws Exception {
         try {
             loadConfig();
             new ActiveAutoPilotSource(ActiveAutoPilotSource.class.getName(), "b", "c", "d", "e");
@@ -285,7 +285,7 @@ public class ActiveAutoPilotSourceFailureTests extends FailureTestsHelper {
         try {
             loadConfig();
             new ActiveAutoPilotSource(ActiveAutoPilotSource.class.getName() + ".Loop", ProjectManager.class.getName(),
-                    "c", "d", "e");
+                "c", "d", "e");
             fail("ConfigurationException should be thrown");
         } catch (ConfigurationException e) {
             assertTrue("Cause not as expected", e.getCause() instanceof IllegalReferenceException);
@@ -301,7 +301,7 @@ public class ActiveAutoPilotSourceFailureTests extends FailureTestsHelper {
         try {
             loadConfig();
             new ActiveAutoPilotSource(ActiveAutoPilotSource.class.getName() + ".WrongType",
-                    ProjectManager.class.getName(), "c", "d", "e");
+                ProjectManager.class.getName(), "c", "d", "e");
             fail("ConfigurationException should be thrown");
         } catch (ConfigurationException e) {
             // ok

@@ -94,7 +94,7 @@ public class TestDataFactory {
      * <p>A <code>String</code> providing the default project pilot namespace to be used for testing.</p>
      */
     public static final String DEFAULT_PROJECT_PILOT_NAMESPACE
-            = "com.topcoder.management.phase.autopilot.accuracytests";
+        = "com.topcoder.management.phase.autopilot.accuracytests";
 
     /**
      * <p>A <code>String</cdoe> providing the configuration property referencing the phase manager to be in use.</p>
@@ -454,7 +454,7 @@ public class TestDataFactory {
      */
     public static com.topcoder.project.phases.Project getPhaseProject() {
         com.topcoder.project.phases.Project project = new com.topcoder.project.phases.Project(new Date(),
-                new DefaultWorkdays());
+                                                                                              new DefaultWorkdays());
         return project;
     }
 }

@@ -47,9 +47,9 @@ public class AutoPilotFailure extends TestCase {
     protected AutoPilot createAutoPilot() throws Exception {
         ConfigManager cfg = ConfigManager.getInstance();
         cfg.add(ActiveAutoPilotSource.class.getName(), "active_auto_source_pilot.xml",
-                ConfigManager.CONFIG_XML_FORMAT);
+            ConfigManager.CONFIG_XML_FORMAT);
         cfg.add(DefaultProjectPilot.class.getName(), "project_pilot.xml",
-                ConfigManager.CONFIG_XML_FORMAT);
+            ConfigManager.CONFIG_XML_FORMAT);
         cfg.add("logging.xml");
         cfg.add(AutoPilot.class.getName(), "auto_pilot.xml", ConfigManager.CONFIG_XML_FORMAT);
         return new AutoPilot();
@@ -65,7 +65,7 @@ public class AutoPilotFailure extends TestCase {
     protected ProjectPilot createProjectPilot() throws Exception {
         ConfigManager cfg = ConfigManager.getInstance();
         cfg.add(DefaultProjectPilot.class.getName(), "project_pilot.xml",
-                ConfigManager.CONFIG_XML_FORMAT);
+            ConfigManager.CONFIG_XML_FORMAT);
         cfg.add("logging.xml");
         return new DefaultProjectPilot();
     }
@@ -79,7 +79,7 @@ public class AutoPilotFailure extends TestCase {
     protected AutoPilotSource createAutoPilotSource() throws Exception {
         ConfigManager cfg = ConfigManager.getInstance();
         cfg.add(ActiveAutoPilotSource.class.getName(), "active_auto_source_pilot.xml",
-                ConfigManager.CONFIG_XML_FORMAT);
+            ConfigManager.CONFIG_XML_FORMAT);
         return new ActiveAutoPilotSource();
     }
 

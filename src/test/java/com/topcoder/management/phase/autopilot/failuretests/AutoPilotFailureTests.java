@@ -200,7 +200,7 @@ public class AutoPilotFailureTests extends FailureTestsHelper {
      * @throws Exception pass to JUnit.
      */
     public void testConstructor2ConfigNoAutoPilotSource()
-            throws Exception {
+        throws Exception {
         try {
             new AutoPilot(AutoPilot.class.getName(), "no", ProjectPilot.class.getName());
             fail("ConfigurationException should be thrown");
@@ -215,7 +215,7 @@ public class AutoPilotFailureTests extends FailureTestsHelper {
      * @throws Exception pass to JUnit.
      */
     public void testConstructor2ConfigNoProjectPilot()
-            throws Exception {
+        throws Exception {
         try {
             new AutoPilot(AutoPilot.class.getName(), AutoPilotSource.class.getName(), "no");
             fail("ConfigurationException should be thrown");
@@ -232,7 +232,7 @@ public class AutoPilotFailureTests extends FailureTestsHelper {
     public void testConstructor2ConfigLoop() throws Exception {
         try {
             new AutoPilot(AutoPilot.class.getName() + ".Loop", AutoPilotSource.class.getName(),
-                    ProjectPilot.class.getName());
+                ProjectPilot.class.getName());
             fail("ConfigurationException should be thrown");
         } catch (ConfigurationException e) {
             assertTrue("Cause not as expected", e.getCause() instanceof IllegalReferenceException);
@@ -247,7 +247,7 @@ public class AutoPilotFailureTests extends FailureTestsHelper {
     public void testConstructor2ConfigWrongType() throws Exception {
         try {
             new AutoPilot(AutoPilot.class.getName() + ".WrongType", AutoPilotSource.class.getName(),
-                    ProjectPilot.class.getName());
+                ProjectPilot.class.getName());
             fail("ConfigurationException should be thrown");
         } catch (ConfigurationException e) {
             // ok
@@ -330,7 +330,7 @@ public class AutoPilotFailureTests extends FailureTestsHelper {
      * @throws Exception pass to JUnit.
      */
     public void testAdvanceProjects1AutoPilotSourceFail()
-            throws Exception {
+        throws Exception {
         try {
             MockProjectManager.setSearchProjectsException(true);
             autoPilot.advanceProjects("operator");
@@ -347,7 +347,7 @@ public class AutoPilotFailureTests extends FailureTestsHelper {
      * @throws Exception pass to JUnit.
      */
     public void testAdvanceProjects1ProjectPilotFail()
-            throws Exception {
+        throws Exception {
         MockProjectManager.setSearchProjectsException(false);
         MockPhaseManager.setGetPhasesException(true);
         autoPilot.advanceProjects("operator");
@@ -431,7 +431,7 @@ public class AutoPilotFailureTests extends FailureTestsHelper {
      * @throws Exception pass to JUnit.
      */
     public void testAdvanceProjects2ProjectPilotFail()
-            throws Exception {
+        throws Exception {
         MockProjectManager.setSearchProjectsException(false);
         MockPhaseManager.setGetPhasesException(true);
         autoPilot.advanceProjects(new long[] {2, 4 }, "operator");
