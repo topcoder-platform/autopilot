@@ -16,12 +16,12 @@ jdk_home=c:/Program Files/Java/jdk1.5.0_22
 ## Used by tcs_informix-ds.xml #
 ################################
 # typical windows configuration
-database.server=tc-informix
+database.server=localhost
 database.port=2021
 database.username=informix
 database.password=1nf0rm1x
 database.INFORMIXSERVER=informixoltp_tcp
-dataware.server=tc-informix
+dataware.server=localhost
 dataware.port=2021
 dataware.username=informix
 dataware.password=1nf0rm1x
@@ -55,7 +55,7 @@ redis.host_url=redis://localhost:6379
 ## Parameters used by EmailEngine.xml #
 #######################################
 # typical VM and windows configuration
-emailengine_smtp_host=tc-fakesmtp
+emailengine_smtp_host=localhost
 emailengine_smtp_port=25
 emailengine_smtp_user=do_not_reply@topcoder.com
 emailengine_smtp_password=top_coder

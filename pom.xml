@@ -215,7 +215,7 @@
                         <argument>-autopilot</argument>
                         <argument>com.topcoder.management.phase.autopilot.AutoPilot</argument>
                         <argument>-poll</argument>
-                        <argument>20</argument>
+                        <argument>300</argument>
                     </arguments>
                 </configuration>
             </plugin>
