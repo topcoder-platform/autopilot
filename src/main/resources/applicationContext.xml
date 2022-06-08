@@ -1,0 +1,91 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:sec="http://www.springframework.org/schema/security"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+  http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+  http://www.springframework.org/schema/aop
+  http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
+  http://www.springframework.org/schema/context
+  http://www.springframework.org/schema/context/spring-context-2.5.xsd
+  http://www.springframework.org/schema/tx
+  http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
+  http://www.springframework.org/schema/security
+  http://www.springframework.org/schema/security/spring-security-2.0.xsd">
+
+    <context:annotation-config/>
+    <context:property-placeholder location="classpath:applicationConfig.properties"/>
+    <context:component-scan base-package="com.topcoder.onlinereview.component" />
+
+    <import resource="phaseHandlers.xml" />
+    <import resource="searchBundle.xml" />
+    <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="com.informix.jdbc.IfxDriver" />
+        <property name="url" value="jdbc:informix-sqli://@database.server@:@database.port@/tcs_catalog:INFORMIXSERVER=@database.INFORMIXSERVER@;IFX_USE_STRENC=true" />
+        <property name="username" value="@database.username@"/>
+        <property name="password" value="@database.password@"/>
+    </bean>
+    <bean id="oltpDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="com.informix.jdbc.IfxDriver" />
+        <property name="url" value="jdbc:informix-sqli://@database.server@:@database.port@/informixoltp:INFORMIXSERVER=@database.INFORMIXSERVER@;IFX_USE_STRENC=true" />
+        <property name="username" value="@database.username@"/>
+        <property name="password" value="@database.password@"/>
+    </bean>
+    <bean id="tcsDwDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="com.informix.jdbc.IfxDriver" />
+        <property name="url" value="jdbc:informix-sqli://@dataware.server@:@dataware.port@/tcs_dw:INFORMIXSERVER=@dataware.INFORMIXSERVER@;IFX_USE_STRENC=true" />
+        <property name="username" value="@dataware.username@"/>
+        <property name="password" value="@dataware.password@"/>
+    </bean>
+    <bean id="commonDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="com.informix.jdbc.IfxDriver" />
+        <property name="url" value="jdbc:informix-sqli://@database.server@:@database.port@/common_oltp:INFORMIXSERVER=@database.INFORMIXSERVER@;IFX_USE_STRENC=true" />
+        <property name="username" value="@database.username@"/>
+        <property name="password" value="@database.password@"/>
+    </bean>
+
+    <bean id="tcsJdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    <bean id="tcsDwJdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+        <property name="dataSource" ref="tcsDwDataSource"/>
+    </bean>
+
+    <bean id="oltpJdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+        <property name="dataSource" ref="oltpDataSource"/>
+    </bean>
+    <bean id="commonJdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+        <property name="dataSource" ref="commonDataSource"/>
+    </bean>
+
+    <bean id="autoPilotSource" class="com.topcoder.management.phase.autopilot.impl.ActiveAutoPilotSource" >
+        <property name="projectManager" ref="projectManager" />
+        <property name="activeStatusName" value="Active" />
+        <property name="extPropAutoPilotSwitch" value="Autopilot Option" />
+        <property name="extPropAutoPilotSwitchValue" value="On" />
+    </bean>
+    <bean id="projectValidator" class="com.topcoder.management.phase.autopilot.bean.ProjectValidatorImpl" />
+    <bean id="managersProvider" class="com.topcoder.management.phase.autopilot.bean.ManagersProviderImpl" />
+    <bean id="phaseManager" class="com.topcoder.onlinereview.component.project.phase.PhaseManager" />
+    <bean id="projectPilot" class="com.topcoder.management.phase.autopilot.impl.DefaultProjectPilot" >
+        <property name="projectManager" ref="projectManager" />
+        <property name="phaseManager" ref="phaseManager" />
+        <property name="scheduledStatusName" value="Scheduled" />
+        <property name="openStatusName" value="Open" />
+    </bean>
+    <bean id="autoPilot" class="com.topcoder.management.phase.autopilot.AutoPilot" >
+        <property name="autoPilotSource" ref="autoPilotSource" />
+        <property name="projectPilot" ref="projectPilot" />
+    </bean>
+    <bean id="autoPilotJob" class="com.topcoder.management.phase.autopilot.AutoPilotJob" scope="prototype" >
+        <property name="autoPilot" ref="autoPilot" />
+        <property name="operator" value="22841596" />
+    </bean>
+    <bean id="pollConfigFile" class="java.lang.String">
+        <constructor-arg value="pollConfigFile.xml" />
+    </bean>
+    <bean id="pollWatchFile" class="java.lang.String">
+        <constructor-arg value="@auto_pilot_guard_file@" />
+    </bean>
+</beans>
+        

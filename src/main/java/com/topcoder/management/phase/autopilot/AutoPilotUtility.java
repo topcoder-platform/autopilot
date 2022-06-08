@@ -4,6 +4,42 @@
 
 package com.topcoder.management.phase.autopilot;
 
+import com.topcoder.management.phase.autopilot.logging.LogMessage;
+import com.topcoder.onlinereview.component.commandline.ArgumentValidationException;
+import com.topcoder.onlinereview.component.commandline.CommandLineUtility;
+import com.topcoder.onlinereview.component.commandline.IllegalSwitchException;
+import com.topcoder.onlinereview.component.commandline.IntegerValidator;
+import com.topcoder.onlinereview.component.commandline.Switch;
+import com.topcoder.onlinereview.component.commandline.UsageException;
+import com.topcoder.onlinereview.component.project.phase.PhaseHandler;
+import com.topcoder.onlinereview.component.project.phase.PhaseManager;
+import com.topcoder.onlinereview.component.project.phase.PhaseOperationEnum;
+import com.topcoder.onlinereview.component.project.phase.PhaseType;
+import com.topcoder.onlinereview.component.project.phase.handler.AppealsPhaseHandler;
+import com.topcoder.onlinereview.component.project.phase.handler.CheckpointSubmissionPhaseHandler;
+import com.topcoder.onlinereview.component.project.phase.handler.SpecificationReviewPhaseHandler;
+import com.topcoder.onlinereview.component.project.phase.handler.SpecificationSubmissionPhaseHandler;
+import com.topcoder.onlinereview.component.project.phase.handler.or.PRAggregationPhaseHandler;
+import com.topcoder.onlinereview.component.project.phase.handler.or.PRAppealResponsePhaseHandler;
+import com.topcoder.onlinereview.component.project.phase.handler.or.PRApprovalPhaseHandler;
+import com.topcoder.onlinereview.component.project.phase.handler.or.PRCheckpointReviewPhaseHandler;
+import com.topcoder.onlinereview.component.project.phase.handler.or.PRCheckpointScreeningPhaseHandler;
+import com.topcoder.onlinereview.component.project.phase.handler.or.PRFinalFixPhaseHandler;
+import com.topcoder.onlinereview.component.project.phase.handler.or.PRFinalReviewPhaseHandler;
+import com.topcoder.onlinereview.component.project.phase.handler.or.PRIterativeReviewPhaseHandler;
+import com.topcoder.onlinereview.component.project.phase.handler.or.PRPostMortemPhaseHandler;
+import com.topcoder.onlinereview.component.project.phase.handler.or.PRRegistrationPhaseHandler;
+import com.topcoder.onlinereview.component.project.phase.handler.or.PRReviewPhaseHandler;
+import com.topcoder.onlinereview.component.project.phase.handler.or.PRScreeningPhaseHandler;
+import com.topcoder.onlinereview.component.project.phase.handler.or.PRSubmissionPhaseHandler;
+import com.topcoder.onlinereview.component.scheduler.Job;
+import com.topcoder.onlinereview.component.scheduler.JobActionException;
+import com.topcoder.onlinereview.component.scheduler.Scheduler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -12,26 +48,6 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.List;
-
-import com.topcoder.management.phase.autopilot.logging.LogMessage;
-import com.topcoder.util.commandline.ArgumentValidationException;
-import com.topcoder.util.commandline.CommandLineUtility;
-import com.topcoder.util.commandline.IllegalSwitchException;
-import com.topcoder.util.commandline.IntegerValidator;
-import com.topcoder.util.commandline.Switch;
-import com.topcoder.util.commandline.UsageException;
-import com.topcoder.util.config.ConfigManager;
-import com.topcoder.util.config.ConfigManagerException;
-import com.topcoder.util.config.UnknownNamespaceException;
-import com.topcoder.util.log.Level;
-import com.topcoder.util.log.Log;
-import com.topcoder.util.log.LogManager;
-import com.topcoder.util.log.log4j.Log4jLogFactory;
-import com.topcoder.util.scheduler.Job;
-import com.topcoder.util.scheduler.JobActionException;
-import com.topcoder.util.scheduler.Scheduler;
-
-import org.apache.log4j.PropertyConfigurator;
 
 /**
  * <p>
@@ -49,14 +65,9 @@ import org.apache.log4j.PropertyConfigurator;
  * @author sindu, abelli, VolodymyrK
  * @version 1.0.2
  */
-public class AutoPilotUtility  {
+public class AutoPilotUtility {
 
-    /**
-     * <p>Defines the property key in the config manager that must contain the log4j config file name.</p>
-     *
-     * @since 1.0.2
-     */
-    private static final String CONFIG_LOG4J_CONFIG_FILE_KEY = "log4jConfigFile";
+    private static final Logger log = LoggerFactory.getLogger(AutoPilotUtility.class);
 
     /**
      * <p>
@@ -124,28 +135,29 @@ public class AutoPilotUtility  {
      * full name and AutoPilot's full name respectively.<br>
      * <br>
      * </p>
+     *
      * @param args the command line arguments
      * @throws IllegalArgumentException if argument is invalid, i.e.
-     *             <ul>
-     *             <li>specifying namespace without apKey (and vice versa) for project mode,</li>
-     *             <li>specifying both poll/project, or no poll/project is given,</li>
-     *             <li>specifying jobname without poll,</li>
-     *             <li>poll interval cannot be converted to long</li>
-     *             <li>poll interval &lt;= 0,</li>
-     *             <li>project id cannot be converted to long</li>
-     *             <li><code>IllegalSwitchException</code> occurs</li>
-     *             <li><code>ArgumentValidationException</code> occurs</li>
-     *             <li><code>UsageException</code> occurs</li>
-     *             </ul>
-     * @throws ConfigurationException if any error occurs loading config file or instantiating the
-     *             AutoPilotJob or while configuring the job scheduler
+     *                                  <ul>
+     *                                  <li>specifying namespace without apKey (and vice versa) for project mode,</li>
+     *                                  <li>specifying both poll/project, or no poll/project is given,</li>
+     *                                  <li>specifying jobname without poll,</li>
+     *                                  <li>poll interval cannot be converted to long</li>
+     *                                  <li>poll interval &lt;= 0,</li>
+     *                                  <li>project id cannot be converted to long</li>
+     *                                  <li><code>IllegalSwitchException</code> occurs</li>
+     *                                  <li><code>ArgumentValidationException</code> occurs</li>
+     *                                  <li><code>UsageException</code> occurs</li>
+     *                                  </ul>
+     * @throws ConfigurationException   if any error occurs loading config file or instantiating the
+     *                                  AutoPilotJob or while configuring the job scheduler
      * @throws AutoPilotSourceException if any error occurs retrieving project ids from
-     *             AutoPilotSource
-     * @throws PhaseOperationException if any error occurs while ending/starting a phase
-     * @throws RuntimeException if runtime exceptions occurs while executing the command line.
+     *                                  AutoPilotSource
+     * @throws PhaseOperationException  if any error occurs while ending/starting a phase
+     * @throws RuntimeException         if runtime exceptions occurs while executing the command line.
      */
     public static void main(String[] args) throws ConfigurationException, AutoPilotSourceException,
-        PhaseOperationException {
+            PhaseOperationException {
         if (null == args) {
             throw new IllegalArgumentException("args cannot be null");
         }
@@ -156,58 +168,91 @@ public class AutoPilotUtility  {
             showUsage();
             return;
         }
+        ApplicationContext context = new ClassPathXmlApplicationContext("applicationContext.xml");
 
-        String namespace = clu.getSwitch("namespace").getValue();
-        try {
-            // Get config file. Assume pre-loaded if not specified.
-            String configFile = clu.getSwitch("config").getValue();
-            if (configFile != null) {
-                ConfigManager cfg = ConfigManager.getInstance();
-                cfg.add(configFile);
-            }
-
-            // Load log4j configuration
-            String log4JConfigFile = ConfigManager.getInstance().getString(namespace, CONFIG_LOG4J_CONFIG_FILE_KEY);
-            if (log4JConfigFile != null && log4JConfigFile.trim().length() > 0) {
-                PropertyConfigurator.configure(log4JConfigFile);
-            }
-            LogManager.setLogFactory(new Log4jLogFactory(true));
-        } catch (ConfigManagerException e) {
-            System.out.println("fail to load namespace cause of config manager exception:"
-                    + "\n" + LogMessage.getExceptionStackTrace(e));
-            throw new ConfigurationException("fail to load namespace cause of config manager exception", e);
-        }
+        addPhaseHandlers(context);
 
         List validSwitches = clu.getValidSwitches();
-        Log log = LogManager.getLog("AutoPilot");
 
         try {
             // One of project and poll can exist.
             if (validSwitches.contains(pollSwitch)
-                && validSwitches.contains(projectSwitch)) {
+                    && validSwitches.contains(projectSwitch)) {
                 // Both poll and project exists.
                 showUsage();
                 throw new IllegalArgumentException("either project or poll can exist");
 
             } else if (!validSwitches.contains(pollSwitch)
-                && !validSwitches.contains(projectSwitch)) {
+                    && !validSwitches.contains(projectSwitch)) {
                 // Neither poll nor project exists.
                 showUsage();
                 throw new IllegalArgumentException("either project or poll must exist");
 
             } else if (validSwitches.contains(projectSwitch)) {
                 // Deal with project mode.
-                dealProject(clu, namespace);
+                dealProject(clu, context.getBean(AutoPilotJob.class));
 
             } else if (validSwitches.contains(pollSwitch)) {
                 // Deal with poll mode.
-                dealPoll(clu, namespace, log);
+                dealPoll(clu, context.getBean("pollConfigFile", String.class), context.getBean("pollWatchFile", String.class));
             }
         } catch (RuntimeException t) {
-        	log.log(Level.ERROR, "fail to build command line cause of illegal switch:"
-        			+ "\n" + LogMessage.getExceptionStackTrace(t));
+            log.error("fail to build command line cause of illegal switch:"
+                    + "\n" + LogMessage.getExceptionStackTrace(t));
             showUsage();
             throw t;
+        }
+    }
+
+    private static void addPhaseHandlers(ApplicationContext context) {
+        PhaseManager phaseManager = context.getBean(PhaseManager.class);
+        PhaseType[] entities = phaseManager.getAllPhaseTypes();
+        registerPhaseHandlerForOperation(phaseManager, context.getBean(PRRegistrationPhaseHandler.class),
+                entities, "Registration");
+        registerPhaseHandlerForOperation(phaseManager, context.getBean(PRSubmissionPhaseHandler.class),
+                entities, "Submission");
+        registerPhaseHandlerForOperation(phaseManager, context.getBean(PRScreeningPhaseHandler.class),
+                entities, "Screening");
+        registerPhaseHandlerForOperation(phaseManager, context.getBean(PRReviewPhaseHandler.class),
+                entities, "Review");
+        registerPhaseHandlerForOperation(phaseManager, context.getBean(AppealsPhaseHandler.class),
+                entities, "Appeals");
+        registerPhaseHandlerForOperation(phaseManager, context.getBean(PRAppealResponsePhaseHandler.class),
+                entities, "Appeals Response");
+        registerPhaseHandlerForOperation(phaseManager, context.getBean(PRAggregationPhaseHandler.class),
+                entities, "Aggregation");
+        registerPhaseHandlerForOperation(phaseManager, context.getBean(PRFinalFixPhaseHandler.class),
+                entities, "Final Fix");
+        registerPhaseHandlerForOperation(phaseManager, context.getBean(PRFinalReviewPhaseHandler.class),
+                entities, "Final Review");
+        registerPhaseHandlerForOperation(phaseManager, context.getBean(PRApprovalPhaseHandler.class),
+                entities, "Approval");
+        registerPhaseHandlerForOperation(phaseManager, context.getBean(PRPostMortemPhaseHandler.class),
+                entities, "Post-Mortem");
+        registerPhaseHandlerForOperation(phaseManager, context.getBean(SpecificationSubmissionPhaseHandler.class),
+                entities, "Specification Submission");
+        registerPhaseHandlerForOperation(phaseManager, context.getBean(SpecificationReviewPhaseHandler.class),
+                entities, "Specification Review");
+        registerPhaseHandlerForOperation(phaseManager, context.getBean(CheckpointSubmissionPhaseHandler.class),
+                entities, "Checkpoint Submission");
+        registerPhaseHandlerForOperation(phaseManager, context.getBean(PRCheckpointScreeningPhaseHandler.class),
+                entities, "Checkpoint Screening");
+        registerPhaseHandlerForOperation(phaseManager, context.getBean(PRCheckpointReviewPhaseHandler.class),
+                entities, "Checkpoint Review");
+        registerPhaseHandlerForOperation(phaseManager, context.getBean(PRIterativeReviewPhaseHandler.class),
+                entities, "Iterative Review");
+    }
+
+    private static void registerPhaseHandlerForOperation(PhaseManager manager,
+                                                         PhaseHandler handler,
+                                                         PhaseType[] entities,
+                                                         String phaseName) {
+        for (PhaseType entity : entities) {
+            if (phaseName.equals(entity.getName())) {
+                manager.registerHandler(handler, entity, PhaseOperationEnum.START);
+                manager.registerHandler(handler, entity, PhaseOperationEnum.END);
+                return;
+            }
         }
     }
 
@@ -216,11 +261,8 @@ public class AutoPilotUtility  {
      * Parse the arguments.
      * </p>
      *
-     * @param commandLineUtility
-     *            the command line utility.
-     * @param args
-     *            the arguments.
-     *
+     * @param commandLineUtility the command line utility.
+     * @param args               the arguments.
      * @return <code>false</code> if any error occurs; <code>true</code> otherwise.
      */
     private static boolean parseArgs(CommandLineUtility commandLineUtility, String[] args) {
@@ -228,13 +270,9 @@ public class AutoPilotUtility  {
             // create switches
             pollSwitch = new Switch("poll", false, 0, 1, new IntegerValidator(), "Poll interval in seconds");
             projectSwitch = new Switch("project", false, 0, -1, new IntegerValidator(), "Project id");
-            Switch namespaceSwitch = new Switch("namespace", false, 1, 1, null, "Namespace configuration");
-            Switch configSwitch = new Switch("config", false, 1, 1, null, "The configuration file to load");
             Switch autoPilotSwitch = new Switch("autopilot", false, 1, 1, null, "AutoPilot key");
             Switch jobNameSwitch = new Switch("jobname", false, 1, 1, null, "Job name");
-            
-            commandLineUtility.addSwitch(configSwitch);
-            commandLineUtility.addSwitch(namespaceSwitch);
+
             commandLineUtility.addSwitch(autoPilotSwitch);
             commandLineUtility.addSwitch(pollSwitch);
             commandLineUtility.addSwitch(jobNameSwitch);
@@ -244,7 +282,7 @@ public class AutoPilotUtility  {
         }
 
         try {
-            commandLineUtility.parse(args);            
+            commandLineUtility.parse(args);
             return true;
         } catch (ArgumentValidationException e) {
             System.out.println("Argument validation fails.");
@@ -259,8 +297,9 @@ public class AutoPilotUtility  {
      * <p>
      * Create IAE with the message, and init the cause.
      * </p>
+     *
      * @param message the message.
-     * @param t the cause.
+     * @param t       the cause.
      * @return the IllegalArgumentException.
      */
     private static IllegalArgumentException createIAE(String message, Throwable t) {
@@ -275,13 +314,12 @@ public class AutoPilotUtility  {
      * <p>
      * Deal with poll mode.
      * </p>
+     *
      * @param clu the parsed command line utility.
-     * @param namespace the namespace value.
-     * @param log the log to use.
      * @throws ConfigurationException - if there is configuration exceptions.
      */
-    private static void dealPoll(CommandLineUtility clu, String namespace, Log log)
-        throws ConfigurationException {
+    private static void dealPoll(CommandLineUtility clu, String configFile, String watchFile)
+            throws ConfigurationException {
         // Use 60 seconds if interval not specified.
         int interval = 60;
         String poll = clu.getSwitch("poll").getValue();
@@ -291,8 +329,7 @@ public class AutoPilotUtility  {
 
         // Get job name and schedule.
         String jobName = clu.getSwitch("jobname").getValue();
-        schedule((null == namespace) ? AutoPilotJob.class.getName() : namespace,
-            (null == jobName) ? "AutoPilotJob" : jobName, interval, log);
+        schedule(configFile, (null == jobName) ? "AutoPilotJob" : jobName, interval, watchFile);
         scheduler.start();
     }
 
@@ -300,26 +337,17 @@ public class AutoPilotUtility  {
      * <p>
      * Deal with project mode.
      * </p>
-     * @param clu the parsed command line utility.
-     * @param namespace the namespace value
+     *
      * @throws IllegalArgumentException - if jobname is specified, or namespace specified without
-     *             apKey (and vice versa)
-     * @throws ConfigurationException - if there is configuration exceptions.
+     *                                  apKey (and vice versa)
+     * @throws ConfigurationException   - if there is configuration exceptions.
      * @throws AutoPilotSourceException - if there is auto pilot source exceptions.
-     * @throws PhaseOperationException - if there is phase operation exceptions.
+     * @throws PhaseOperationException  - if there is phase operation exceptions.
      */
-    private static void dealProject(CommandLineUtility clu, String namespace)
-        throws ConfigurationException, AutoPilotSourceException, PhaseOperationException {
+    private static void dealProject(CommandLineUtility clu, AutoPilotJob autoPilotJob)
+            throws ConfigurationException, AutoPilotSourceException, PhaseOperationException {
         if (null != clu.getSwitch("jobname").getValue()) {
             throw new IllegalArgumentException("jobname cannot be specified for project mode");
-        }
-
-        String autoPilot = clu.getSwitch("autopilot").getValue();
-
-        // namespace and autopilot can exist both or neither.
-        if ((null == namespace && null != autoPilot)
-            || (null != namespace && null == autoPilot)) {
-            throw new IllegalArgumentException("ns and apKey cannot be specified only one");
         }
 
         // Parse project Ids.
@@ -328,18 +356,13 @@ public class AutoPilotUtility  {
         if (null != ids && !ids.isEmpty()) {
             projectId = new long[ids.size()];
             int i = -1;
-            for (Iterator it = ids.iterator(); it.hasNext();) {
+            for (Iterator it = ids.iterator(); it.hasNext(); ) {
                 projectId[++i] = Long.parseLong((String) it.next());
             }
         }
 
-        // Create AutoPilotJob instance.
-        AutoPilotJob autoPilotJob = (null == namespace && null == autoPilot) ? new AutoPilotJob()
-            : new AutoPilotJob(namespace, autoPilot);
-
         // run and print the result.
-        AutoPilotResult[] result;
-        result = (null == projectId) ? autoPilotJob.execute() : autoPilotJob.run(projectId);
+        AutoPilotResult[] result = (null == projectId) ? autoPilotJob.execute() : autoPilotJob.run(projectId);
         printResult(result);
     }
 
@@ -351,7 +374,7 @@ public class AutoPilotUtility  {
     private static void showUsage() {
         try {
             BufferedReader br = new BufferedReader(new InputStreamReader(
-                AutoPilotJob.class.getResourceAsStream("usage")));
+                    AutoPilotJob.class.getResourceAsStream("usage")));
             String ln = br.readLine();
             while (ln != null) {
                 System.err.println(ln);
@@ -367,6 +390,7 @@ public class AutoPilotUtility  {
      * <p>
      * Print the auto pilot result.
      * </p>
+     *
      * @param result result array.
      */
     private static void printResult(AutoPilotResult[] result) {
@@ -411,11 +435,12 @@ public class AutoPilotUtility  {
      * created with the given name, starting at midnight and executing every interval seconds until
      * forever.
      * </p>
-     * @param jobName the job name
+     *
+     * @param jobName  the job name
      * @param interval the interval (in seconds)
      * @return a Job to run AutoPilotJob starting at midnight today at every interval seconds
      * @throws IllegalArgumentException if jobName is null or an empty (trimmed) string or interval <=
-     *             0
+     *                                  0
      */
     public static Job createJob(String jobName, int interval) {
         // Check arguments.
@@ -435,7 +460,7 @@ public class AutoPilotUtility  {
         start.set(Calendar.SECOND, 0);
         start.set(Calendar.MILLISECOND, 0);
         return new Job(jobName, start, null, interval, Calendar.SECOND,
-            Scheduler.JOB_TYPE_JAVA_CLASS, AutoPilotJob.class.getName());
+                Scheduler.JOB_TYPE_JAVA_CLASS, AutoPilotJob.class.getName());
     }
 
     /**
@@ -449,22 +474,21 @@ public class AutoPilotUtility  {
      * auto pilot job if there exists the job with the same name. Otherwise the auto pilot job will
      * be added.
      * </p>
-     * @param namespace the namespace to configure scheduler with
-     * @param jobName the job name
+     *
+     * @param jobName  the job name
      * @param interval the interval in seconds
-     * @param log the log to use.
      * @throws IllegalArgumentException if string parameters are null or empty (trimmed) string, or
-     *             interval is non-positive.
-     * @throws ConfigurationException if an error occurs configuring the Scheduler
+     *                                  interval is non-positive.
+     * @throws ConfigurationException   if an error occurs configuring the Scheduler
      */
-    public static void schedule(String namespace, String jobName, int interval, Log log)
-        throws ConfigurationException {
+    public static void schedule(String fileName, String jobName, int interval, String watchFileName)
+            throws ConfigurationException {
         // Check arguments.
-        if (null == namespace) {
-            throw new IllegalArgumentException("namespace cannot be null");
+        if (null == fileName) {
+            throw new IllegalArgumentException("fileName cannot be null");
         }
-        if (namespace.trim().length() < 1) {
-            throw new IllegalArgumentException("namespace cannot be empty");
+        if (fileName.trim().length() < 1) {
+            throw new IllegalArgumentException("fileName cannot be empty");
         }
         if (null == jobName) {
             throw new IllegalArgumentException("jobName cannot be null");
@@ -478,10 +502,10 @@ public class AutoPilotUtility  {
 
         synchronized (AutoPilotJob.class) {
             if (scheduler == null) {
-                scheduler = new Scheduler(namespace);
+                scheduler = new Scheduler(fileName);
             }
             if (stopper == null) {
-                stopper = new Thread(new AutoPilotJobStopper(AutoPilotJob.class.getName()));
+                stopper = new Thread(new AutoPilotJobStopper(watchFileName));
             }
         }
 
@@ -499,11 +523,11 @@ public class AutoPilotUtility  {
                     scheduler.replaceJob(oldJob, newJob);
                 }
             } catch (JobActionException e) {
-                log.log(Level.ERROR, "fail to add job '" + jobName
+                log.error("fail to add job '" + jobName
                         + "' cause of job action exception \n" + LogMessage.getExceptionStackTrace(e));
-                throw new ConfigurationException("fail to add job '" + jobName  + "' cause of job action exception", e);
+                throw new ConfigurationException("fail to add job '" + jobName + "' cause of job action exception", e);
             } catch (RuntimeException e) {
-                log.log(Level.ERROR, "fail to add job '" + jobName
+                log.error("fail to add job '" + jobName
                         + "' cause of run time exception \n" + LogMessage.getExceptionStackTrace(e));
                 throw new ConfigurationException("fail to add job '" + jobName + "' cause of run time exception", e);
             }
@@ -519,12 +543,13 @@ public class AutoPilotUtility  {
      * <p>
      * Find job with the specified name.
      * </p>
+     *
      * @param jobName the job name.
      * @return the job with the specified name.
      */
     private static Job findJob(String jobName) {
         Job oldJob = null;
-        for (Iterator it = scheduler.getJobList().iterator(); it.hasNext();) {
+        for (Iterator it = scheduler.getJobList().iterator(); it.hasNext(); ) {
             Job job = (Job) it.next();
             if (job.getName().equals(jobName)) {
                 oldJob = job;
@@ -538,6 +563,7 @@ public class AutoPilotUtility  {
      * <p>
      * Returns the internal scheduler instance (could be null).
      * </p>
+     *
      * @return the internal scheduler instance (could be null if schedule hasn't been called yet)
      */
     public static Scheduler getScheduler() {
@@ -552,15 +578,6 @@ public class AutoPilotUtility  {
      * @version 1.0
      */
     private static class AutoPilotJobStopper implements Runnable {
-
-        /**
-         * <p>Defines the property key in the config manager that must contain the guard file name used to signal the job
-         * that entire process is to be stopped.</p>
-         *
-         * @since 1.0.1
-         */
-        private static final String CONFIG_GUARD_FILE_KEY = "GuardFile";
-
         /**
          * <p>A <code>File</code> referencing the file on the local file system which presence indicates that the job
          * has to stop and quit.</p>
@@ -572,30 +589,14 @@ public class AutoPilotUtility  {
         /**
          * <p>The log used by this class for logging errors and debug information.</p>
          */
-        private final Log log = LogManager.getLog("AutoPilot");
+        private final Logger log = LoggerFactory.getLogger(AutoPilotJobStopper.class);
 
         /**
          * <p>Constructs new <code>AutoPilotJobStopper</code> instance.</p>
          *
-         * @param namespace a <code>String</code> providing the cofniguration namespace.
          * @throws ConfigurationException if an unexpected error occurs.
          */
-        private AutoPilotJobStopper(String namespace) throws ConfigurationException {
-            // Get watch file with GuardFile key.
-            String watchFileName;
-            try {
-                watchFileName = ConfigManager.getInstance().getString(namespace, CONFIG_GUARD_FILE_KEY);
-            } catch (UnknownNamespaceException e) {
-                log.log(Level.FATAL,
-                        "fail to get watch file name cause of unknown namespace '" + namespace + "' \n"
-                        + LogMessage.getExceptionStackTrace(e));
-                throw new ConfigurationException("fail to get watch file name cause of unknown namespace '"
-                    + namespace + "'", e);
-            }
-            if (watchFileName == null || watchFileName.trim().length() == 0) {
-                throw new ConfigurationException("Watch file name parameter is missing from namespace '"
-                    + namespace + "'");
-            }
+        private AutoPilotJobStopper(String watchFileName) throws ConfigurationException {
             this.guardFile = new File(watchFileName);
         }
 
@@ -614,10 +615,10 @@ public class AutoPilotUtility  {
                     // Ignore
                 }
             }
-            log.log(Level.INFO, "Got a signal to stop the entire Auto Pilot process by presence of file "
-                                   + this.guardFile);
+            log.info("Got a signal to stop the entire Auto Pilot process by presence of file "
+                    + this.guardFile);
             scheduler.stop();
-            log.log(Level.INFO, "Called the scheduler to stop");
+            log.info("Called the scheduler to stop");
         }
     }
 }

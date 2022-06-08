@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<Config>
+  <Property name="AutoPilotJob">
+    <Value>StartDTG:October 12, 2010 12:00:00 AM</Value>
+    <Value>EndDTG:</Value>
+    <Value>IntervalValue:1</Value>
+    <Value>IntervalUnit:MINUTE</Value>
+    <Value>JobType:JOB_TYPE_JAVA_CLASS</Value>
+    <Value>JobCmd:com.topcoder.management.phase.autopilot.AutoPilotJob</Value>
+  </Property>
+</Config>

@@ -4,7 +4,7 @@
 
 package com.topcoder.management.phase.autopilot;
 
-import com.topcoder.project.phases.Phase;
+import com.topcoder.onlinereview.component.project.phase.Phase;
 
 /**
  * <p>

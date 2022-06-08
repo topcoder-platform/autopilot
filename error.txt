@@ -1,0 +1,1 @@
+org.xml.sax.SAXParseException; systemId: file:/Users/zhulizhong/workspaces/topcoder/topcoder-platform/autopilot/pollConfigFile.xml; lineNumber: 12; columnNumber: 1; XML document structures must start and end within the same entity.
