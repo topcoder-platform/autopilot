@@ -7,7 +7,6 @@ RUN mkdir -p /opt/autopilot
 WORKDIR /opt/autopilot
 
 Add ./target/auto-pilot-1.0-SNAPSHOT-spring-boot.jar /opt/autopilot/
-Add ./config /opt/autopilot/
 Add ./xml_phase_template.xsd /opt/autopilot/
 Add ./TCSTemplate_Design.xml /opt/autopilot/
 
