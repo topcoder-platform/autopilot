@@ -4,7 +4,7 @@
 
 package com.topcoder.management.phase.autopilot;
 
-import com.topcoder.util.errorhandling.BaseException;
+import com.topcoder.onlinereview.component.exception.BaseException;
 
 /**
  * <p>

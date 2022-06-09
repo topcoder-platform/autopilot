@@ -4,39 +4,28 @@
 
 package com.topcoder.management.phase.autopilot.impl;
 
+import com.topcoder.kafka.messaging.KafkaMessageProducer;
+import com.topcoder.management.phase.autopilot.AutoPilotResult;
+import com.topcoder.management.phase.autopilot.PhaseOperationException;
+import com.topcoder.management.phase.autopilot.ProjectPilot;
+import com.topcoder.onlinereview.component.project.management.PersistenceException;
+import com.topcoder.onlinereview.component.project.management.ProjectManager;
+import com.topcoder.onlinereview.component.project.phase.Dependency;
+import com.topcoder.onlinereview.component.project.phase.Phase;
+import com.topcoder.onlinereview.component.project.phase.PhaseManagementException;
+import com.topcoder.onlinereview.component.project.phase.PhaseManager;
+import com.topcoder.onlinereview.component.project.phase.Project;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.TimeZone;
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
-
-import com.fasterxml.jackson.core.JsonFactory;
-
-import com.topcoder.kafka.messaging.KafkaMessageProducer;
-import com.topcoder.kafka.messaging.MessageTemplate;
-import com.topcoder.management.phase.PhaseManagementException;
-import com.topcoder.management.phase.PhaseManager;
-import com.topcoder.management.phase.autopilot.AutoPilotResult;
-import com.topcoder.management.phase.autopilot.ConfigurationException;
-import com.topcoder.management.phase.autopilot.PhaseOperationException;
-import com.topcoder.management.phase.autopilot.ProjectPilot;
-import com.topcoder.management.project.PersistenceException;
-import com.topcoder.management.project.ProjectManager;
-import com.topcoder.project.phases.Dependency;
-import com.topcoder.project.phases.Phase;
-import com.topcoder.project.phases.Project;
-import com.topcoder.util.log.Level;
-import com.topcoder.util.log.Log;
-import com.topcoder.util.log.LogException;
-import com.topcoder.util.log.LogManager;
-import com.topcoder.util.objectfactory.InvalidClassSpecificationException;
-import com.topcoder.util.objectfactory.ObjectFactory;
-import com.topcoder.util.objectfactory.impl.ConfigManagerSpecificationFactory;
-import com.topcoder.util.objectfactory.impl.IllegalReferenceException;
-import com.topcoder.util.objectfactory.impl.SpecificationConfigurationException;
 
 /**
  * <p>
@@ -74,20 +63,13 @@ public class DefaultProjectPilot implements ProjectPilot {
 
     /**
      * <p>
-     * Represents the default log name to be used for auditing. Referenced in ctor().
-     * </p>
-     */
-    public static final String DEFAULT_LOG_NAME = "AutoPilot";
-
-    /**
-     * <p>
      * Represents the PhaseManager instance that is used to retrieve project phases. This variable
      * is initially null, initialized in constructor using object factory and immutable afterwards.
      * It is referenced by advancePhase to getPhases, query whether phase can be ended/started, and
      * end/start the phase itself. It can be retrieved with the getter.
      * </p>
      */
-    private final PhaseManager phaseManager;
+    private PhaseManager phaseManager;
 
     /**
      * <p>
@@ -97,7 +79,7 @@ public class DefaultProjectPilot implements ProjectPilot {
      * end/start the phase itself. It can be retrieved with the getter.
      * </p>
      */
-    private final ProjectManager projectManager;
+    private ProjectManager projectManager;
 
     /**
      * <p>
@@ -107,7 +89,7 @@ public class DefaultProjectPilot implements ProjectPilot {
      * the getter.
      * </p>
      */
-    private final Log log;
+    private static final Logger log = LoggerFactory.getLogger(DefaultProjectPilot.class);
 
     /**
      * <p>
@@ -117,7 +99,7 @@ public class DefaultProjectPilot implements ProjectPilot {
      * retrieved with the getter.
      * </p>
      */
-    private final String scheduledStatusName;
+    private String scheduledStatusName;
 
     /**
      * <p>
@@ -127,7 +109,7 @@ public class DefaultProjectPilot implements ProjectPilot {
      * retrieved with the getter.
      * </p>
      */
-    private final String openStatusName;
+    private String openStatusName;
 
     /**
      * <p>
@@ -136,181 +118,20 @@ public class DefaultProjectPilot implements ProjectPilot {
      */
     private final KafkaMessageProducer producer = new KafkaMessageProducer();
 
-    /**
-     * <p>
-     * Constructs a new instance of DefaultProjectPilot class. This will initialize the phase
-     * manager instance using object factory. The object factory is initialized with this class'
-     * full name as its configuration namespace. Inside this namespace, a property with the key of
-     * PhaseManager's full name is used to retrieve phase manager instance.<br>
-     * {@link #DEFAULT_SCHEDULED_STATUS_NAME} will be used as scheduled status name;
-     * {@link #DEFAULT_OPEN_STATUS_NAME} will be used as open status name; {@link #DEFAULT_LOG_NAME}
-     * will be used as log name.
-     * </p>
-     * @throws ConfigurationException if any error occurs instantiating the object factory or the
-     *             phase manager instance
-     */
-    public DefaultProjectPilot() throws ConfigurationException {
-        this(DefaultProjectPilot.class.getName(), PhaseManager.class.getName(),
-            DEFAULT_SCHEDULED_STATUS_NAME, DEFAULT_OPEN_STATUS_NAME, DEFAULT_LOG_NAME, ProjectManager.class.getName());
-    }
-
-    /**
-     * <p>
-     * Constructs a new instance of DefaultProjectPilot class using the given
-     * namespace/phaseManagerKey to get PhaseManager instance with object factory, the given
-     * scheduled/open status name, and the given log name. This will initialize the phase manager
-     * instance using object factory. The object factory is initialized with namespace. Inside this
-     * namespace, a property with the key of phaseManagerKey is used to retrieve phase manager
-     * instance. A Log instance with the specified logName is then retrieved.<br>
-     * </p>
-     * @param namespace the namespace to initialize object factory with
-     * @param phaseManagerKey the key defining the PhaseManager instance
-     * @param scheduledStatusName A non-null string representing a phase status of scheduled
-     * @param openStatusName A non-null string representing a phase status of open
-     * @param logName A non-null string representing the log name to use for auditing
-     * @throws IllegalArgumentException if any parameter is null or empty (trimmed) string
-     * @throws ConfigurationException if any error occurs instantiating the object factory or the
-     *             phase manager instance or the log
-     */
-    public DefaultProjectPilot(String namespace, String phaseManagerKey,
-        String scheduledStatusName, String openStatusName, String logName, String projectManagerkey)
-        throws ConfigurationException {
-        // Check arguments.
-        checkArguments(namespace, phaseManagerKey, scheduledStatusName, openStatusName, logName);
-
-        // Create object factory to create phaseManager.
-        ObjectFactory of;
-        Object objPhaseManager;
-        Object objProjectManager;
-        try {
-            of = new ObjectFactory(new ConfigManagerSpecificationFactory(namespace));
-
-            objPhaseManager = of.createObject(phaseManagerKey);
-            if (!PhaseManager.class.isInstance(objPhaseManager)) {
-                throw new ConfigurationException(
-                    "fail to create PhaseManager object cause of bad type:" + objPhaseManager);
-            }
-
-            objProjectManager = of.createObject(projectManagerkey);
-            if (!ProjectManager.class.isInstance(objProjectManager)) {
-                throw new ConfigurationException(
-                        "fail to create ProjectManager object cause of bad type:" + objProjectManager);
-            }
-        } catch (InvalidClassSpecificationException e) {
-            throw new ConfigurationException(
-                "fail to create phase manager cause of invalid class specification", e);
-        } catch (SpecificationConfigurationException e) {
-            throw new ConfigurationException(
-                "fail to create object factory cause of specification configuration exception", e);
-        } catch (IllegalReferenceException e) {
-            throw new ConfigurationException(
-                "fail to create object factory cause of illegal reference", e);
-        }
-
-
-        // Assign to fields.
-        this.log = LogManager.getLog(logName);
-        this.phaseManager = (PhaseManager) objPhaseManager;
-        this.projectManager = (ProjectManager) objProjectManager;
-        this.scheduledStatusName = scheduledStatusName;
-        this.openStatusName = openStatusName;
-    }
-
-    /**
-     * <p>
-     * Constructs a new instance of DefaultProjectPilot class using the given PhaseManager instance
-     * and parameters.
-     * </p>
-     * @param phaseManager the PhaseManager instance to use
-     * @param scheduledStatusName A non-null string representing a phase status of scheduled
-     * @param openStatusName A non-null string representing a phase status of open
-     * @param log the log instance to use for auditing
-     * @throws IllegalArgumentException if any of the parameter is null or any of the string
-     *             parameters are empty (trimmed) string
-     */
-    public DefaultProjectPilot(PhaseManager phaseManager, String scheduledStatusName,
-        String openStatusName, Log log, ProjectManager projectManager) {
-        // Check arguments.
-        if (null == phaseManager) {
-            throw new IllegalArgumentException("phaseManager cannot be null");
-        }
-        if (null == scheduledStatusName) {
-            throw new IllegalArgumentException("scheduledStatusName cannot be null");
-        }
-        if (scheduledStatusName.trim().length() < 1) {
-            throw new IllegalArgumentException("scheduledStatusName cannot be empty");
-        }
-        if (null == scheduledStatusName) {
-            throw new IllegalArgumentException("scheduledStatusName cannot be null");
-        }
-        if (scheduledStatusName.trim().length() < 1) {
-            throw new IllegalArgumentException("scheduledStatusName cannot be empty");
-        }
-        if (null == openStatusName) {
-            throw new IllegalArgumentException("openStatusName cannot be null");
-        }
-        if (openStatusName.trim().length() < 1) {
-            throw new IllegalArgumentException("openStatusName cannot be empty");
-        }
-        if (null == log) {
-            throw new IllegalArgumentException("log cannot be null");
-        }
-        if (null == projectManager) {
-            throw new IllegalArgumentException("projectManager cannot be null");
-        }
-
+    public void setPhaseManager(PhaseManager phaseManager) {
         this.phaseManager = phaseManager;
-        this.scheduledStatusName = scheduledStatusName;
-        this.openStatusName = openStatusName;
-        this.log = log;
-        this.projectManager = projectManager;
-
-        getLog().log(Level.INFO, "created DefaultProjectPilot");
     }
 
-    /**
-     * <p>
-     * Check arguments for {@link #DefaultProjectPilot(String, String, String, String, String)}.
-     * </p>
-     * @param namespace namespace for the constructor.
-     * @param phaseManagerKey phaseManagerKey for the constructor.
-     * @param scheduledStatusName scheduledStatusName for the constructor.
-     * @param openStatusName openStatusName for the constructor.
-     * @param logName logName for the constructor.
-     * @throws IllegalArgumentException if any parameter is null or empty (trimmed) string
-     */
-    private void checkArguments(String namespace, String phaseManagerKey,
-                    String scheduledStatusName, String openStatusName, String logName) {
-        if (null == namespace) {
-            throw new IllegalArgumentException("namespace cannot be null");
-        }
-        if (namespace.trim().length() < 1) {
-            throw new IllegalArgumentException("namespace cannot be empty");
-        }
-        if (null == phaseManagerKey) {
-            throw new IllegalArgumentException("phaseManagerKey cannot be null");
-        }
-        if (phaseManagerKey.trim().length() < 1) {
-            throw new IllegalArgumentException("phaseManagerKey cannot be empty");
-        }
-        if (null == scheduledStatusName) {
-            throw new IllegalArgumentException("scheduledStatusName cannot be null");
-        }
-        if (scheduledStatusName.trim().length() < 1) {
-            throw new IllegalArgumentException("scheduledStatusName cannot be empty");
-        }
-        if (null == openStatusName) {
-            throw new IllegalArgumentException("openStatusName cannot be null");
-        }
-        if (openStatusName.trim().length() < 1) {
-            throw new IllegalArgumentException("openStatusName cannot be empty");
-        }
-        if (null == logName) {
-            throw new IllegalArgumentException("logName cannot be null");
-        }
-        if (logName.trim().length() < 1) {
-            throw new IllegalArgumentException("logName cannot be empty");
-        }
+    public void setProjectManager(ProjectManager projectManager) {
+        this.projectManager = projectManager;
+    }
+
+    public void setScheduledStatusName(String scheduledStatusName) {
+        this.scheduledStatusName = scheduledStatusName;
+    }
+
+    public void setOpenStatusName(String openStatusName) {
+        this.openStatusName = openStatusName;
     }
 
     /**
@@ -324,16 +145,6 @@ public class DefaultProjectPilot implements ProjectPilot {
     }
 
     protected ProjectManager getProjectManager() { return this.projectManager; }
-
-    /**
-     * <p>
-     * Return the log instance used to do auditing of phase start/end.
-     * </p>
-     * @return A non-null log instance used to audit phase change
-     */
-    protected Log getLog() {
-        return log;
-    }
 
     /**
      * <p>
@@ -391,7 +202,7 @@ public class DefaultProjectPilot implements ProjectPilot {
         try {
             proj = phaseManager.getPhases(projectId);
             if (null == proj) {
-                getLog().log(Level.ERROR, "project with " + projectId + " does not exist");
+                log.error("project with " + projectId + " does not exist");
                 throw new PhaseOperationException(projectId, null, "project with " + projectId + " does not exist");
             }
 
@@ -407,9 +218,7 @@ public class DefaultProjectPilot implements ProjectPilot {
         } catch (Exception e) {
             ByteArrayOutputStream s = new ByteArrayOutputStream();
             e.printStackTrace(new PrintStream(s));
-            getLog().log(
-                Level.ERROR,
-                new Date().toString()
+            log.error(new Date()
                     + " - Error occurs while trying to advance phases of project with id "
                     + projectId
                     + ", stack trace : "
@@ -495,7 +304,7 @@ public class DefaultProjectPilot implements ProjectPilot {
                 phaseManager.end(phase, operator);
                 count[0]++;
 
-                com.topcoder.management.project.Project project;
+                com.topcoder.onlinereview.component.project.management.Project project;
                 try {
                     project = projectManager.getProject(phase.getProject().getId());
                 } catch (PersistenceException e) {
@@ -505,7 +314,7 @@ public class DefaultProjectPilot implements ProjectPilot {
                 doAudit(phase, true, operator, project.getProjectStatus().getName());
             }
         } catch (PhaseManagementException e) {
-            getLog().log(Level.ERROR, "fail to end the phase cause of phase management exception");
+            log.error("fail to end the phase cause of phase management exception");
             throw new PhaseOperationException(phase.getProject().getId(), phase,
                 "fail to end the phase cause of phase management exception", e);
         }
@@ -521,7 +330,7 @@ public class DefaultProjectPilot implements ProjectPilot {
                 doAudit(phase, false, operator);
             }
         } catch (PhaseManagementException e) {
-            getLog().log(Level.ERROR, "fail to start the phase cause of phase management exception");
+            log.error("fail to start the phase cause of phase management exception");
             throw new PhaseOperationException(phase.getProject().getId(), phase,
                 "fail to start the phase cause of phase management exception", e);
         }
@@ -561,9 +370,7 @@ public class DefaultProjectPilot implements ProjectPilot {
      */
     protected void doAudit(Phase phase, boolean isEnd, String operator, String projectStatus)
         throws PhaseOperationException {
-        getLog().log(
-            Level.INFO,
-            new Date().toString()
+        log.info(new Date().toString()
                 + " - project "
                 + phase.getProject().getId()
                 + " - phase "
@@ -581,7 +388,7 @@ public class DefaultProjectPilot implements ProjectPilot {
                     (null == phase.getPhaseType()) ? "Null Phase Type" : phase.getPhaseType().getName(),
                     isEnd ? "END" : "START", operator, projectStatus);
 
-        getLog().log(Level.INFO, "JSON_MESSAGE ::: WILL SEND");
+        log.info("JSON_MESSAGE ::: WILL SEND");
 
         producer.postRequestUsingGson(message);
     }

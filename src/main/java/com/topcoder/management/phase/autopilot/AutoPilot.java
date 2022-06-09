@@ -4,20 +4,14 @@
 
 package com.topcoder.management.phase.autopilot;
 
+import com.topcoder.management.phase.autopilot.logging.LogMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-
-import com.topcoder.management.phase.autopilot.logging.LogMessage;
-import com.topcoder.util.log.Level;
-import com.topcoder.util.log.Log;
-import com.topcoder.util.log.LogManager;
-import com.topcoder.util.objectfactory.InvalidClassSpecificationException;
-import com.topcoder.util.objectfactory.ObjectFactory;
-import com.topcoder.util.objectfactory.impl.ConfigManagerSpecificationFactory;
-import com.topcoder.util.objectfactory.impl.IllegalReferenceException;
-import com.topcoder.util.objectfactory.impl.SpecificationConfigurationException;
 
 /**
  * <p>
@@ -43,7 +37,7 @@ public class AutoPilot {
     /**
      * <p>The log used by this class for logging errors and debug information.</p>
      */
-    private final Log log;
+    private static final Logger log = LoggerFactory.getLogger(AutoPilot.class);
 
     /**
      * The collection which hold ids of processing project.
@@ -64,7 +58,7 @@ public class AutoPilot {
      * advanceProjects(String) to retrieve project ids which are to advance.
      * </p>
      */
-    private final AutoPilotSource autoPilotSource;
+    private AutoPilotSource autoPilotSource;
 
     /**
      * <p>
@@ -74,166 +68,7 @@ public class AutoPilot {
      * String) to advance the given project id phases.
      * </p>
      */
-    private final ProjectPilot projectPilot;
-
-    /**
-     * <p>
-     * Constructs a new instance of AutoPilot class. The object factory is initialized with this
-     * class' fullname as its configuration namespace. Inside this namespace, properties with the
-     * keys of AutoPilotSource and ProjectPilot's full names are used to retrieve the corresponding
-     * instances.
-     * </p>
-     * @throws ConfigurationException if any error occurs instantiating the object factory or the
-     *             auto pilot source or project pilot instance
-     */
-    public AutoPilot() throws ConfigurationException {
-        this(AutoPilot.class.getName(), AutoPilotSource.class.getName(),
-            ProjectPilot.class.getName());
-    }
-
-    /**
-     * <p>
-     * Constructs a new instance of AutoPilot class using the given autoPilotSourceKey /
-     * projectPilotKey to get AutoPilotSource/ProjectPilot instance with object factory. The object
-     * factory is initialized with namespace as its configuration namespace. Inside this namespace,
-     * properties with the keys of autoPilotSourceKey and projectPilotKey are used to retrieve the
-     * corresponding instances.<br>
-     * </p>
-     * @param namespace the namespace to initialize object factory with
-     * @param autoPilotSourceKey the key defining the AutoPilotSource instance
-     * @param projectPilotKey the key defining the ProjectPilot instance
-     * @throws IllegalArgumentException if any of the argument is null or empty (trimmed) string
-     * @throws ConfigurationException if any error occurs instantiating the object factory or the
-     *             auto pilot source or project pilot instance
-     */
-    public AutoPilot(String namespace, String autoPilotSourceKey, String projectPilotKey)
-        throws ConfigurationException {
-        // Check arguments.
-        checkArguments(namespace, autoPilotSourceKey, projectPilotKey);
-        this.log = LogManager.getLog("AutoPilot");
-        
-        log.log(Level.DEBUG, "Instantiate AutoPilot with namespace:" + namespace
-        		+ " ,autoPilotSourceKey:" + autoPilotSourceKey + " and projectPilotKey:" + projectPilotKey);
-        // Create object factory.
-        ObjectFactory of;
-        try {
-            of = new ObjectFactory(new ConfigManagerSpecificationFactory(namespace));
-        } catch (SpecificationConfigurationException e) {
-        	log.log(Level.FATAL,
-        			"fail to create object factory instance cause of specification configuration exception \n"
-        			+ LogMessage.getExceptionStackTrace(e));
-            throw new ConfigurationException(
-                "fail to create object factory instance cause of specification configuration exception",
-                e);
-        } catch (IllegalReferenceException e) {
-        	log.log(Level.FATAL,
-        			"fail to create object factory instance cause of illegal reference exception \n"
-        			+ LogMessage.getExceptionStackTrace(e));
-            throw new ConfigurationException(
-                "fail to create object factory instance cause of illegal reference exception", e);
-        }
-
-        log.log(Level.DEBUG, "create Objectfactory from namespace: " + namespace);
-        
-        // Create auto pilot source from object factory.
-        Object objAutoPilotSource;
-        try {
-            objAutoPilotSource = of.createObject(autoPilotSourceKey);
-            if (!AutoPilotSource.class.isInstance(objAutoPilotSource)) {
-            	log.log(Level.FATAL, "fail to create AutoPilotSource object cause of bad type:" + objAutoPilotSource);
-                throw new ConfigurationException(
-                    "fail to create AutoPilotSource object cause of bad type:" + objAutoPilotSource);
-            }
-            log.log(Level.DEBUG, "create AutoPilotSource from objectfactory with autoPilotSourceKey:" + autoPilotSourceKey);
-        } catch (InvalidClassSpecificationException e) {
-        	log.log(Level.FATAL,
-        			"fail to create auto pilot source cause of invalid class specification exception \n"
-        			+ LogMessage.getExceptionStackTrace(e));
-            throw new ConfigurationException(
-                "fail to create auto pilot source cause of invalid class specification exception",
-                e);
-        }
-
-        // Create project pilot from object factory.
-        Object objProjectPilot;
-        try {
-            objProjectPilot = of.createObject(projectPilotKey);
-            if (!ProjectPilot.class.isInstance(objProjectPilot)) {
-            	log.log(Level.FATAL, "fail to create ProjectPilot object cause of bad type:" + objProjectPilot);
-                throw new ConfigurationException(
-                    "fail to create ProjectPilot object cause of bad type:" + objProjectPilot);
-            }
-            log.log(Level.DEBUG, "create ProjectPilot from objectfactory with projectPilotKey:" + projectPilotKey);
-        } catch (InvalidClassSpecificationException e) {
-        	log.log(Level.FATAL,
-        			"fail to create project pilot cause of invalid class specification exception \n"
-        			+ LogMessage.getExceptionStackTrace(e));
-            throw new ConfigurationException(
-                "fail to create project pilot cause of invalid class specification exception", e);
-        }
-
-        // Assign to fields.
-        this.autoPilotSource = (AutoPilotSource) objAutoPilotSource;
-        this.projectPilot = (ProjectPilot) objProjectPilot;
-    }
-
-    /**
-     * <p>
-     * Constructs a new instance of AutoPilot class using the given AutoPilotSource/ProjectPilot
-     * instances.
-     * </p>
-     * @param autoPilotSource the AutoPilotSource instance to use
-     * @param projectPilot the ProjectPilot instance to use
-     * @param log the Log instance
-     * @throws IllegalArgumentException if any of the parameter is null
-     */
-    public AutoPilot(AutoPilotSource autoPilotSource, ProjectPilot projectPilot, Log log) {
-        // Check arguments.
-        if (null == autoPilotSource) {
-            throw new IllegalArgumentException("autoPilotSource cannot be null");
-        }
-        if (null == projectPilot) {
-            throw new IllegalArgumentException("projectPilot cannot be null");
-        }
-        if (null == log) {
-            throw new IllegalArgumentException("log cannot be null");
-        }
-
-        this.log = log;
-        this.autoPilotSource = autoPilotSource;
-        this.projectPilot = projectPilot;
-        log.log(Level.DEBUG, "Instantiate AutoPilot with AutoPilot and ProjectPilot");
-    }
-
-    /**
-     * <p>
-     * Check arguments for {@link #AutoPilot(String, String, String)}.
-     * </p>
-     * @param namespace namespace for the constructor.
-     * @param autoPilotSourceKey autoPilotSourceKey for the constructor.
-     * @param projectPilotKey projectPilotKey for the constructor.
-     * @throws IllegalArgumentException - if any of the argument is null or empty (trimmed) string
-     */
-    private void checkArguments(String namespace, String autoPilotSourceKey, String projectPilotKey) {
-        if (null == namespace) {
-            throw new IllegalArgumentException("namespace cannot be null");
-        }
-        if (namespace.trim().length() < 1) {
-            throw new IllegalArgumentException("namespace cannot be empty");
-        }
-        if (null == autoPilotSourceKey) {
-            throw new IllegalArgumentException("autoPilotSourceKey cannot be null");
-        }
-        if (autoPilotSourceKey.trim().length() < 1) {
-            throw new IllegalArgumentException("autoPilotSourceKey cannot be empty");
-        }
-        if (null == projectPilotKey) {
-            throw new IllegalArgumentException("projectPilotKey cannot be null");
-        }
-        if (projectPilotKey.trim().length() < 1) {
-            throw new IllegalArgumentException("projectPilotKey cannot be empty");
-        }
-    }
+    private ProjectPilot projectPilot;
 
     /**
      * <p>
@@ -253,6 +88,14 @@ public class AutoPilot {
      */
     protected ProjectPilot getProjectPilot() {
         return projectPilot;
+    }
+
+    public void setAutoPilotSource(AutoPilotSource autoPilotSource) {
+        this.autoPilotSource = autoPilotSource;
+    }
+
+    public void setProjectPilot(ProjectPilot projectPilot) {
+        this.projectPilot = projectPilot;
     }
 
     /**
@@ -311,7 +154,7 @@ public class AutoPilot {
         if (projectId.length < 1) {
             return ZERO_AUTO_PILOT_RESULT_ARRAY;
         }
-        log.log(Level.DEBUG, new LogMessage(null, operator, "Checking active projects: " + getIdString(projectId)));
+        log.debug(new LogMessage(null, operator, "Checking active projects: " + getIdString(projectId)).toString());
 
         // Map key is Long (project id). Map value is AutoPilotResult instance.
         Map resMap = new HashMap();
@@ -322,7 +165,7 @@ public class AutoPilot {
             // Check if the project is processing by another thread
             synchronized (processingProjectIds) {
                 if (processingProjectIds.contains(longProjectId)) {
-                    log.log(Level.INFO, new LogMessage(null, operator, "Stopped in synchronized for projectId=" + longProjectId));
+                    log.info(new LogMessage(null, operator, "Stopped in synchronized for projectId=" + longProjectId).toString());
                     continue;
                 } else {
                     processingProjectIds.add(longProjectId);
@@ -363,7 +206,7 @@ public class AutoPilot {
      * @throws PhaseOperationException if any error occurs while ending/starting a phase
      */
     public AutoPilotResult advanceProject(long projectId, String operator) throws PhaseOperationException {
-    	log.log(Level.INFO, new LogMessage(new Long(projectId), operator, "Checking project phases."));
+    	log.info(new LogMessage(new Long(projectId), operator, "Checking project phases.").toString());
         return projectPilot.advancePhases(projectId, operator);
     }
     /**

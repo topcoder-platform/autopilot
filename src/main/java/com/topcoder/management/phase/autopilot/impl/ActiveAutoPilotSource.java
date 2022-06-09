@@ -4,24 +4,16 @@
 
 package com.topcoder.management.phase.autopilot.impl;
 
-import com.topcoder.management.phase.autopilot.AutoPilot;
 import com.topcoder.management.phase.autopilot.AutoPilotSource;
 import com.topcoder.management.phase.autopilot.AutoPilotSourceException;
-import com.topcoder.management.phase.autopilot.ConfigurationException;
 import com.topcoder.management.phase.autopilot.logging.LogMessage;
-import com.topcoder.management.project.PersistenceException;
-import com.topcoder.management.project.Project;
-import com.topcoder.management.project.ProjectFilterUtility;
-import com.topcoder.management.project.ProjectManager;
-import com.topcoder.search.builder.filter.Filter;
-import com.topcoder.util.log.Level;
-import com.topcoder.util.log.Log;
-import com.topcoder.util.log.LogManager;
-import com.topcoder.util.objectfactory.InvalidClassSpecificationException;
-import com.topcoder.util.objectfactory.ObjectFactory;
-import com.topcoder.util.objectfactory.impl.ConfigManagerSpecificationFactory;
-import com.topcoder.util.objectfactory.impl.IllegalReferenceException;
-import com.topcoder.util.objectfactory.impl.SpecificationConfigurationException;
+import com.topcoder.onlinereview.component.project.management.PersistenceException;
+import com.topcoder.onlinereview.component.project.management.Project;
+import com.topcoder.onlinereview.component.project.management.ProjectFilterUtility;
+import com.topcoder.onlinereview.component.project.management.ProjectManager;
+import com.topcoder.onlinereview.component.search.filter.Filter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * <p>
@@ -73,7 +65,7 @@ public class ActiveAutoPilotSource implements AutoPilotSource {
     /**
      * <p>The log used by this class for logging errors and debug information.</p>
      */
-    private final Log log;
+    private static final Logger log = LoggerFactory.getLogger(ActiveAutoPilotSource.class);
     
     /**
      * <p>
@@ -83,7 +75,7 @@ public class ActiveAutoPilotSource implements AutoPilotSource {
      * the getter.
      * </p>
      */
-    private final ProjectManager projectManager;
+    private ProjectManager projectManager;
 
     /**
      * <p>
@@ -92,7 +84,7 @@ public class ActiveAutoPilotSource implements AutoPilotSource {
      * afterwards. It is referenced by getProjectId. It can be retrieved with the getter.
      * </p>
      */
-    private final String activeStatusName;
+    private String activeStatusName;
 
     /**
      * <p>
@@ -101,7 +93,7 @@ public class ActiveAutoPilotSource implements AutoPilotSource {
      * It is referenced by getProjectId. It can be retrieved with the getter.
      * </p>
      */
-    private final String extPropAutoPilotSwitch;
+    private String extPropAutoPilotSwitch;
 
     /**
      * <p>
@@ -110,196 +102,7 @@ public class ActiveAutoPilotSource implements AutoPilotSource {
      * It is referenced by getProjectId. It can be retrieved with the getter.
      * </p>
      */
-    private final String extPropAutoPilotSwitchValue;
-
-    /**
-     * <p>
-     * Constructs a new instance of ActiveAutoPilotSource class. This will initialize the project
-     * manager instance using object factory. The object factory is initialized with this class'
-     * full name as its configuration namespace. Inside this namespace, a property with the key of
-     * ProjectManager's full name is used to retrieve project manager instance.<br>
-     * {@link #DEFAULT_ACTIVE_STATUS_NAME} will be used as active status name;
-     * {@link #DEFAULT_EXTPROP_AUTOPILOTSWITCH} will be used as extProp;
-     * {@link #DEFAULT_EXTPROP_AUTOPILOTSWITCH_VALUE} will be used as extPropValue.
-     * </p>
-     * @throws ConfigurationException if any error occurs instantiating the object factory or the
-     *             project manager instance
-     */
-    public ActiveAutoPilotSource() throws ConfigurationException {
-        this(ActiveAutoPilotSource.class.getName(), ProjectManager.class.getName(),
-            DEFAULT_ACTIVE_STATUS_NAME, DEFAULT_EXTPROP_AUTOPILOTSWITCH,
-            DEFAULT_EXTPROP_AUTOPILOTSWITCH_VALUE);
-    }
-
-    /**
-     * <p>
-     * Constructs a new instance of ActiveAutoPilotSource class using the given
-     * namespace/projectManagerKey to get ProjectManager instance with object factory. The projects
-     * will be searched whose status are the given activeStatusName having the given extended
-     * property key/value (extProp/extPropVal). This will initialize the project manager instance
-     * using object factory. The object factory is initialized with namespace. Inside this
-     * namespace, a property with the key of projectManagerKey is used to retrieve project manager
-     * instance.
-     * </p>
-     * @param namespace the namespace to initialize object factory with
-     * @param projectManagerKey the key defining the ProjectManager instance
-     * @param activeStatusName A non-null string representing a project status of active
-     * @param extProp A non-null string representing the extended property name for auto pilot
-     *            switch
-     * @param extPropVal A non-null string representing the extended property value for auto pilot
-     *            switch
-     * @throws IllegalArgumentException if any of the argument is null or empty (trimmed) string
-     * @throws ConfigurationException if any error occurs instantiating the object factory or the
-     *             project manager instance
-     */
-    public ActiveAutoPilotSource(String namespace, String projectManagerKey,
-        String activeStatusName, String extProp, String extPropVal) throws ConfigurationException {
-        // Check arguments.
-        checkArgumentsForCtor(namespace, projectManagerKey, activeStatusName, extProp, extPropVal);
-
-        this.log = LogManager.getLog("AutoPilot");
-
-        log.log(Level.DEBUG, "Create ActiveAutoPilotSource instance with namespace:" + namespace
-        		+ ", projectManagerkey:" + projectManagerKey + ",activeStatusName:"
-        		+ activeStatusName + ", extProp:" + extProp + ", extPropVal:" + extPropVal);
-        // Create object factory.
-        ObjectFactory of;
-        Object objProjectManager;
-        try {
-            of = new ObjectFactory(new ConfigManagerSpecificationFactory(namespace));
-
-            log.log(Level.DEBUG, "create Objectfactory from namespace: " + namespace);
-            
-            // Create project manager from object factory.
-            objProjectManager = of.createObject(projectManagerKey);
-            if (!ProjectManager.class.isInstance(objProjectManager)) {
-            	log.log(Level.FATAL, "fail to create ProjectManager object caused of bad type:" + objProjectManager);
-                throw new ConfigurationException(
-                    "fail to create ProjectManager object caused of bad type:" + objProjectManager);
-            }
-            log.log(Level.DEBUG, "create ProjectManager from objectfactory with key:" + projectManagerKey);
-        } catch (InvalidClassSpecificationException e) {
-        	log.log(Level.FATAL,
-                    "fail to create ProjectManager cause of invalid class specification exception \n"
-        			+ LogMessage.getExceptionStackTrace(e));
-            throw new ConfigurationException(
-                "fail to create project manager cause of invalid class specification", e);
-        } catch (SpecificationConfigurationException e) {
-        	log.log(Level.FATAL,
-                    "fail to create object factory cause of specification configuration exception \n"
-        			+ LogMessage.getExceptionStackTrace(e));
-            throw new ConfigurationException(
-                "fail to create object factory cause of specification configuration exception", e);
-        } catch (IllegalReferenceException e) {
-        	log.log(Level.FATAL,
-                    "fail to create object factory cause of illegal reference \n"
-        			+ LogMessage.getExceptionStackTrace(e));
-            throw new ConfigurationException(
-                "fail to create object factory cause of illegal reference", e);
-        }
-
-        this.projectManager = (ProjectManager) objProjectManager;
-        this.activeStatusName = activeStatusName;
-        this.extPropAutoPilotSwitch = extProp;
-        this.extPropAutoPilotSwitchValue = extPropVal;
-    }
-
-    /**
-     * <p>
-     * Check arguments for {@link #ActiveAutoPilotSource(String, String, String, String, String)}.
-     * </p>
-     * @param namespace namespace argument of constructor.
-     * @param projectManagerKey projectManagerKey argument of constructor.
-     * @param activeStatusName activeStatusName argument of constructor.
-     * @param extProp extProp argument of constructor.
-     * @param extPropVal extPropVal argument of constructor.
-     */
-    private void checkArgumentsForCtor(String namespace, String projectManagerKey,
-                    String activeStatusName, String extProp, String extPropVal) {
-        if (null == namespace) {
-            throw new IllegalArgumentException("namespace cannot be null");
-        }
-        if (namespace.trim().length() < 1) {
-            throw new IllegalArgumentException("namespace cannot be empty");
-        }
-        if (null == projectManagerKey) {
-            throw new IllegalArgumentException("projectManagerKey cannot be null");
-        }
-        if (projectManagerKey.trim().length() < 1) {
-            throw new IllegalArgumentException("projectManagerKey cannot be empty");
-        }
-        if (null == activeStatusName) {
-            throw new IllegalArgumentException("activeStatusName cannot be null");
-        }
-        if (activeStatusName.trim().length() < 1) {
-            throw new IllegalArgumentException("activeStatusName cannot be empty");
-        }
-        if (null == extProp) {
-            throw new IllegalArgumentException("extProp cannot be null");
-        }
-        if (extProp.trim().length() < 1) {
-            throw new IllegalArgumentException("extProp cannot be empty");
-        }
-        if (null == extPropVal) {
-            throw new IllegalArgumentException("extPropVal cannot be null");
-        }
-        if (extPropVal.trim().length() < 1) {
-            throw new IllegalArgumentException("extPropVal cannot be empty");
-        }
-    }
-
-    /**
-     * <p>
-     * Constructs a new instance of ActiveAutoPilotSource class using the ProjectManager instance
-     * and parameter values.
-     * </p>
-     * @param projectManager the ProjectManager instance to use
-     * @param activeStatusName A non-null string representing a project status of active
-     * @param extProp A non-null string representing the extended property name for auto pilot
-     *            switch
-     * @param extPropVal A non-null string representing the extended property value for auto pilot
-     *            switch
-     * @param log the Log instance
-     * @throws IllegalArgumentException if any of the argument is null or the string arguments are
-     *             empty (trimmed)
-     */
-    public ActiveAutoPilotSource(ProjectManager projectManager, String activeStatusName,
-        String extProp, String extPropVal, Log log) {
-        // Check arguments.
-        if (null == projectManager) {
-            throw new IllegalArgumentException("projectManager cannot be null");
-        }
-        if (null == activeStatusName) {
-            throw new IllegalArgumentException("activeStatusName cannot be null");
-        }
-        if (activeStatusName.trim().length() < 1) {
-            throw new IllegalArgumentException("activeStatusName cannot be empty");
-        }
-        if (null == extProp) {
-            throw new IllegalArgumentException("extProp cannot be null");
-        }
-        if (extProp.trim().length() < 1) {
-            throw new IllegalArgumentException("extProp cannot be empty");
-        }
-        if (null == extPropVal) {
-            throw new IllegalArgumentException("extPropVal cannot be null");
-        }
-        if (extPropVal.trim().length() < 1) {
-            throw new IllegalArgumentException("extPropVal cannot be empty");
-        }
-        if (null == log) {
-            throw new IllegalArgumentException("log cannot be null");
-        }
-
-        this.log = log;
-        this.projectManager = projectManager;
-        this.activeStatusName = activeStatusName;
-        this.extPropAutoPilotSwitch = extProp;
-        this.extPropAutoPilotSwitchValue = extPropVal;
-
-        log.log(Level.DEBUG, "Instantiate ActiveAutoPilotSource with ProjectManager, activeStatusName:"
-                + activeStatusName + ",extProp:" + extProp + ", extPropVal:" + extPropVal);
-    }
+    private String extPropAutoPilotSwitchValue;
 
     /**
      * <p>
@@ -341,6 +144,22 @@ public class ActiveAutoPilotSource implements AutoPilotSource {
         return this.extPropAutoPilotSwitchValue;
     }
 
+    public void setProjectManager(ProjectManager projectManager) {
+        this.projectManager = projectManager;
+    }
+
+    public void setActiveStatusName(String activeStatusName) {
+        this.activeStatusName = activeStatusName;
+    }
+
+    public void setExtPropAutoPilotSwitch(String extPropAutoPilotSwitch) {
+        this.extPropAutoPilotSwitch = extPropAutoPilotSwitch;
+    }
+
+    public void setExtPropAutoPilotSwitchValue(String extPropAutoPilotSwitchValue) {
+        this.extPropAutoPilotSwitchValue = extPropAutoPilotSwitchValue;
+    }
+
     /**
      * <p>
      * Retrieves all project ids that are active and have Autopilot option switch on in its extended
@@ -358,8 +177,7 @@ public class ActiveAutoPilotSource implements AutoPilotSource {
 
             return processProject(proj);
         } catch (PersistenceException e) {
-        	log.log(Level.ERROR,
-        			"Fail to get projects from projectManager.\n" + LogMessage.getExceptionStackTrace(e));
+        	log.error("Fail to get projects from projectManager.\n" + LogMessage.getExceptionStackTrace(e));
             throw new AutoPilotSourceException(
                 "fail to search projects cause of persistence exception", e);
         }

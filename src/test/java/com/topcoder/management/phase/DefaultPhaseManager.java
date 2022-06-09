@@ -10,6 +10,10 @@ import java.util.Map;
 
 import com.topcoder.date.workdays.DefaultWorkdays;
 import com.topcoder.management.phase.validation.DefaultPhaseValidator;
+import com.topcoder.onlinereview.component.id.IDGenerator;
+import com.topcoder.onlinereview.component.project.management.Project;
+import com.topcoder.onlinereview.component.project.phase.PhasePersistence;
+import com.topcoder.onlinereview.component.project.phase.PhaseValidator;
 import com.topcoder.project.phases.Phase;
 import com.topcoder.project.phases.PhaseStatus;
 import com.topcoder.project.phases.PhaseType;

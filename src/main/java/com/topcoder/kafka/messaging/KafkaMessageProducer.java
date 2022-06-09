@@ -1,14 +1,9 @@
 package com.topcoder.kafka.messaging;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.TimeZone;
-import java.util.PropertyResourceBundle;
+import com.google.gson.Gson;
+import com.topcoder.onlinereview.component.jwt.JWTTokenGenerator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -16,14 +11,15 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.topcoder.management.phase.autopilot.impl.MessageFormat;
-import com.topcoder.util.log.Level;
-import com.topcoder.util.log.Log;
-import com.topcoder.util.log.LogManager;
-import com.appirio.tech.core.api.v3.util.jwt.JWTTokenGenerator;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.PropertyResourceBundle;
+import java.util.TimeZone;
 
 public class KafkaMessageProducer {
 
@@ -120,7 +116,7 @@ public class KafkaMessageProducer {
 	 * immutable afterwards. It can be retrieved with the getter.
 	 * </p>
 	 */
-	private final Log log;
+	private static final Logger log = LoggerFactory.getLogger(KafkaMessageProducer.class);
 
 	private void setLocalKafkaVariables() {
 		targetURL = "https://api.topcoder-dev.com/v5/bus/events";
@@ -137,18 +133,16 @@ public class KafkaMessageProducer {
 		String fileLocation = System.getProperty("user.dir") + CONFIG_FILE_PATH;
 		File file = new File(fileLocation);
 		if (file.exists()) {
-			getLog().log(Level.INFO, "Using file in " + fileLocation);
+			log.info("Using file in " + fileLocation);
 			prb = new PropertyResourceBundle(new FileInputStream(file));
 		} else {
-			getLog().log(Level.WARN, "Will use file in classpath");
-			prb = new PropertyResourceBundle(getClass().getResourceAsStream(CONFIG_FILE_PATH));
+			log.warn("Will use file in classpath");
+			prb = new PropertyResourceBundle(getClass().getClassLoader().getResourceAsStream(CONFIG_FILE_PATH));
 		}
 		return prb;
 	}
 
 	public KafkaMessageProducer() {
-		this.log = LogManager.getLog(DEFAULT_LOG_NAME);
-
 		try {
 			PropertyResourceBundle prb = getPropertyBundle();
 			targetURL = prb.getString("kafka.target.url");
@@ -164,10 +158,10 @@ public class KafkaMessageProducer {
 			tokenExpirationTime = 60 * 24;
 		} catch (Exception e) {
 			setLocalKafkaVariables();
-			getLog().log(Level.ERROR, "Exception in loading Kafka Properties : " + e.getMessage());
+			log.error("Exception in loading Kafka Properties : " + e.getMessage());
 		}
 
-		getLog().log(Level.INFO, String.format("Topic %s, originator %s", topicName, originator));
+		log.info( String.format("Topic %s, originator %s", topicName, originator));
 	}
 
 	public void postRequestUsingGson(Object payload) {
@@ -185,27 +179,23 @@ public class KafkaMessageProducer {
 		Gson gson = new Gson();
 		String strMessage = gson.toJson(messageTemplate);
 
-		getLog().log(Level.DEBUG, "KAFKA_MESSAGE ::: " + strMessage);
+		log.debug("KAFKA_MESSAGE ::: " + strMessage);
 		try {
 			Client client = ClientBuilder.newClient();
 			WebTarget target = client.target(targetURL);
 			Entity entity = Entity.entity(strMessage, MediaType.APPLICATION_JSON_TYPE);
-			Response response = target.request(MediaType.APPLICATION_JSON_TYPE)
+			target.request(MediaType.APPLICATION_JSON_TYPE)
 					.header("Authorization", "Bearer " + getM2MToken()).post(entity, Response.class);
 
-			getLog().log(Level.INFO, response);
+			log.info("KAFKA_MESSAGE ::: sent success");
 		} catch (Exception e) {
 			StringWriter sw = new StringWriter();
 			e.printStackTrace(new PrintWriter(sw));
-			getLog().log(Level.ERROR, "Exception when sending message to Kakfa Bus : " + e.getMessage());
-			getLog().log(Level.ERROR, "details: " + sw.toString());
+			log.error("Exception when sending message to Kakfa Bus : " + e.getMessage());
+			log.error("details: " + sw.toString());
 		} catch (Throwable e) {
-			getLog().log(Level.ERROR, "Throwable when sending message to Kakfa Bus : " + e.getMessage());
+			log.error("Throwable when sending message to Kakfa Bus : " + e.getMessage());
 		}
-	}
-
-	protected Log getLog() {
-		return log;
 	}
 
 	public String getM2MToken() throws Exception {
