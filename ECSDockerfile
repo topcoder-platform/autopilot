@@ -1,6 +1,6 @@
 FROM openjdk:8u332-jdk-slim
 
-ENV JAVA_OPTS="-Xms1G -Xmx1G -XX:MaxPermSize=256M -server"
+ENV JAVA_OPTS="-Xms4G -Xmx4G -XX:MaxPermSize=512M -server"
 ENV TZ=America/Indiana/Indianapolis
 
 RUN mkdir -p /opt/autopilot
