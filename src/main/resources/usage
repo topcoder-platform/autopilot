@@ -1,0 +1,19 @@
+This command line provides 2 functionalites:
+ - run once (given a list of project ids or retrieve ids from AutoPilotSource)
+ - poll mode (scheduled in background to run Auto Pilot every some intervals)
+
+ The command line syntax is:
+ java AutoPilotUtility (-poll [interval] | -project [Id[, ...]])
+
+    - poll and project These next options are mutually exclusive (to indicate
+        two kinds of run-mode): It is an error if both poll/projects are
+        specified or none are specified.
+
+    A) Poll-mode - poll is used to define the interval in seconds, if interval
+        is not specified, a default of 60 seconds is used. The autopilot job will
+        be executed every this interval starting from midnight.
+
+    B) - project can be specified to process projects with the given ids. The
+        project ids will be processed once and the application terminates, it
+        doesn't go into poll mode. If no ids are given, AutoPilotSource is
+        used instead.

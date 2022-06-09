@@ -184,10 +184,10 @@ public class KafkaMessageProducer {
 			Client client = ClientBuilder.newClient();
 			WebTarget target = client.target(targetURL);
 			Entity entity = Entity.entity(strMessage, MediaType.APPLICATION_JSON_TYPE);
-			Response response = target.request(MediaType.APPLICATION_JSON_TYPE)
+			target.request(MediaType.APPLICATION_JSON_TYPE)
 					.header("Authorization", "Bearer " + getM2MToken()).post(entity, Response.class);
 
-			log.info(response.getEntity().toString());
+			log.info("KAFKA_MESSAGE ::: sent success");
 		} catch (Exception e) {
 			StringWriter sw = new StringWriter();
 			e.printStackTrace(new PrintWriter(sw));

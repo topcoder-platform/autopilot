@@ -1,9 +1,9 @@
-database.server=localhost
+database.server=c-informix
 database.port=2021
 database.username=informix
 database.password=1nf0rm1x
 database.INFORMIXSERVER=informixoltp_tcp
-dataware.server=localhost
+dataware.server=c-informix
 dataware.port=2021
 dataware.username=informix
 dataware.password=1nf0rm1x

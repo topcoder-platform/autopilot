@@ -1,0 +1,24 @@
+version: '3'
+services:
+  tc-informix:
+    image: "tc-informix:latest"
+    platform: linux/amd64
+    hostname: informix.cloud.topcoder.com
+    container_name: tc-online-db
+    build:
+      context: local/db
+    environment:
+      LICENSE: accept
+    ports:
+      - "2021:2021"
+      - "2022:2022"
+      - "27017:27017"
+      - "27018:27018"
+      - "27883:27883"
+    tty: true
+  tc-autopilot:
+    image: tc-autopilot:latest
+    depends_on:
+      - tc-informix
+    build:
+      context: .

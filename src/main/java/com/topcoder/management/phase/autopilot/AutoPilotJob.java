@@ -5,7 +5,6 @@
 package com.topcoder.management.phase.autopilot;
 
 import com.topcoder.management.phase.autopilot.logging.LogMessage;
-import com.topcoder.onlinereview.component.scheduler.Schedulable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,34 +24,12 @@ import org.slf4j.LoggerFactory;
  * @author sindu, abelli, TCSDEVELOPER
  * @version 1.0.2
  */
-public class AutoPilotJob implements Runnable, Schedulable {
+public class AutoPilotJob {
 
     /**
      * <p>The log used by this class for logging errors and debug information.</p>
      */
     private static final Logger log = LoggerFactory.getLogger(AutoPilotJob.class);
-
-    /**
-     * <p>
-     * Represents the default operator name that is used to do auditing if none is specified in the
-     * configuration files.
-     * </p>
-     */
-    public static final String DEFAULT_OPERATOR = "AutoPilotJob";
-
-    /**
-     * <p>
-     * Represents the status to return when a job is running.
-     * </p>
-     */
-    public static final String STATUS_RUNNING = "RUNNING";
-
-    /**
-     * <p>
-     * Represents the status to return when the job is completed.
-     * </p>
-     */
-    public static final String STATUS_DONE = "DONE";
 
     /**
      * <p>
@@ -71,15 +48,6 @@ public class AutoPilotJob implements Runnable, Schedulable {
      * </p>
      */
     private String operator;
-
-    /**
-     * <p>
-     * Represents a flag that indicates whether the job is completed. This variable is initially
-     * false, after run() is complete, it'll be set to true. It is referenced by the isDone() method
-     * to inform the scheduler that the job is completed.
-     * </p>
-     */
-    private boolean done = false;
 
     /**
      * <p>
@@ -107,38 +75,6 @@ public class AutoPilotJob implements Runnable, Schedulable {
 
     public void setOperator(String operator) {
         this.operator = operator;
-    }
-
-    /**
-     * <p>
-     * This method implements 'run' in the Runnable interface. It's invoked to start the job.
-     * </p>
-     * @throws RuntimeException - if fail to execute the auto pilot job. AutoPilotSourceException
-     *             and PhaseOperationException will be wrapped in RuntimeException.
-     */
-    public void run() {
-        // to prevent the potential if the same job instance will be executed more than once.
-        done = false;
-
-        try {
-            execute();
-        } catch (AutoPilotSourceException e) {
-        	log.error( "fail to advance projects with " + getOperator()
-                    + " cause of auto pilot source exception \n" + LogMessage.getExceptionStackTrace(e));
-            e.printStackTrace(System.err);
-            throw new RuntimeException("fail to advance projects with " + getOperator()
-                + " cause of auto pilot source exception", e);
-        } catch (PhaseOperationException e) {
-        	log.error( "fail to advance project " + e.getProjectId() + " phase "
-                    + e.getPhase() + " with " + getOperator()
-                    + " cause of phase operation exception \n" + LogMessage.getExceptionStackTrace(e));
-            e.printStackTrace(System.err);
-            throw new RuntimeException("fail to advance project " + e.getProjectId() + " phase "
-                + e.getPhase() + " with " + getOperator() + " cause of phase operation exception",
-                e);
-        }
-
-        done = true;
     }
 
     /**
@@ -176,37 +112,5 @@ public class AutoPilotJob implements Runnable, Schedulable {
         AutoPilotResult[] ret = autoPilot.advanceProjects(projectId, getOperator());
         log.debug( new LogMessage(null, getOperator(), "AutoPilot iteration - end.").toString());
         return ret;
-    }
-
-    /**
-     * <p>
-     * This method implements 'isDone' in the Schedulable interface. It's invoked by scheduler to
-     * check whether the job is completed.
-     * </p>
-     * @return true if job is completed, false otherwise
-     */
-    public boolean isDone() {
-        return done;
-    }
-
-    /**
-     * <p>
-     * This is invoked by the Scheduler when the Scheduler is stopped. We simply do nothing here. If
-     * the job is still running, we'll let it run until it's finished. Since it's running in its own
-     * thread, we can just do nothing here so that we don't block the scheduler's thread.
-     * </p>
-     */
-    public void close() {
-        // your code here
-    }
-
-    /**
-     * <p>
-     * This should return the job status. Application can poll this status using Scheduler's Job.
-     * </p>
-     * @return STATUS_DONE or STATUS_RUNNING depending whether the job has completed
-     */
-    public String getStatus() {
-        return isDone() ? STATUS_DONE : STATUS_RUNNING;
     }
 }

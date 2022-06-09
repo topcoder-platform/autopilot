@@ -32,22 +32,19 @@ import com.topcoder.onlinereview.component.project.phase.handler.or.PRRegistrati
 import com.topcoder.onlinereview.component.project.phase.handler.or.PRReviewPhaseHandler;
 import com.topcoder.onlinereview.component.project.phase.handler.or.PRScreeningPhaseHandler;
 import com.topcoder.onlinereview.component.project.phase.handler.or.PRSubmissionPhaseHandler;
-import com.topcoder.onlinereview.component.scheduler.Job;
-import com.topcoder.onlinereview.component.scheduler.JobActionException;
-import com.topcoder.onlinereview.component.scheduler.Scheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * <p>
@@ -68,14 +65,6 @@ import java.util.List;
 public class AutoPilotUtility {
 
     private static final Logger log = LoggerFactory.getLogger(AutoPilotUtility.class);
-
-    /**
-     * <p>
-     * A static scheduler instance used to schedule AutoPilotJob. It's lazily initialized in
-     * schedule and immutable afterwards. It can be retrieved with the getter.
-     * </p>
-     */
-    private static Scheduler scheduler;
 
     /**
      * <p>A <code>Thread</code> running the <code>AutoPilotJobStopper</code>.</p>
@@ -194,7 +183,8 @@ public class AutoPilotUtility {
 
             } else if (validSwitches.contains(pollSwitch)) {
                 // Deal with poll mode.
-                dealPoll(clu, context.getBean("pollConfigFile", String.class), context.getBean("pollWatchFile", String.class));
+                ScheduledExecutorService ses = Executors.newScheduledThreadPool(1);
+                dealPoll(clu, context, ses);
             }
         } catch (RuntimeException t) {
             log.error("fail to build command line cause of illegal switch:"
@@ -270,12 +260,7 @@ public class AutoPilotUtility {
             // create switches
             pollSwitch = new Switch("poll", false, 0, 1, new IntegerValidator(), "Poll interval in seconds");
             projectSwitch = new Switch("project", false, 0, -1, new IntegerValidator(), "Project id");
-            Switch autoPilotSwitch = new Switch("autopilot", false, 1, 1, null, "AutoPilot key");
-            Switch jobNameSwitch = new Switch("jobname", false, 1, 1, null, "Job name");
-
-            commandLineUtility.addSwitch(autoPilotSwitch);
             commandLineUtility.addSwitch(pollSwitch);
-            commandLineUtility.addSwitch(jobNameSwitch);
             commandLineUtility.addSwitch(projectSwitch);
         } catch (IllegalSwitchException e) {
             // never happens
@@ -295,30 +280,13 @@ public class AutoPilotUtility {
 
     /**
      * <p>
-     * Create IAE with the message, and init the cause.
-     * </p>
-     *
-     * @param message the message.
-     * @param t       the cause.
-     * @return the IllegalArgumentException.
-     */
-    private static IllegalArgumentException createIAE(String message, Throwable t) {
-        showUsage();
-
-        IllegalArgumentException ex = new IllegalArgumentException(message);
-        ex.initCause(t);
-        return ex;
-    }
-
-    /**
-     * <p>
      * Deal with poll mode.
      * </p>
      *
      * @param clu the parsed command line utility.
      * @throws ConfigurationException - if there is configuration exceptions.
      */
-    private static void dealPoll(CommandLineUtility clu, String configFile, String watchFile)
+    private static void dealPoll(CommandLineUtility clu, ApplicationContext context, ScheduledExecutorService ses)
             throws ConfigurationException {
         // Use 60 seconds if interval not specified.
         int interval = 60;
@@ -326,11 +294,10 @@ public class AutoPilotUtility {
         if (null != poll) {
             interval = Integer.parseInt(poll);
         }
-
-        // Get job name and schedule.
-        String jobName = clu.getSwitch("jobname").getValue();
-        schedule(configFile, (null == jobName) ? "AutoPilotJob" : jobName, interval, watchFile);
-        scheduler.start();
+        ses.scheduleAtFixedRate(() -> {
+            AutoPilotResult[] result = context.getBean(AutoPilotJob.class).execute();
+            printResult(result);
+        }, 0, interval, TimeUnit.SECONDS);
     }
 
     /**
@@ -346,10 +313,6 @@ public class AutoPilotUtility {
      */
     private static void dealProject(CommandLineUtility clu, AutoPilotJob autoPilotJob)
             throws ConfigurationException, AutoPilotSourceException, PhaseOperationException {
-        if (null != clu.getSwitch("jobname").getValue()) {
-            throw new IllegalArgumentException("jobname cannot be specified for project mode");
-        }
-
         // Parse project Ids.
         List ids = clu.getSwitch("project").getValues();
         long[] projectId = null;
@@ -374,7 +337,7 @@ public class AutoPilotUtility {
     private static void showUsage() {
         try {
             BufferedReader br = new BufferedReader(new InputStreamReader(
-                    AutoPilotJob.class.getResourceAsStream("usage")));
+                    AutoPilotJob.class.getClassLoader().getResourceAsStream("usage")));
             String ln = br.readLine();
             while (ln != null) {
                 System.err.println(ln);
@@ -426,199 +389,6 @@ public class AutoPilotUtility {
             System.out.print(buf);
 
             System.out.println('|');
-        }
-    }
-
-    /**
-     * <p>
-     * Returns an AutoPilotJob job to be scheduled using Job Scheduling component. The job is
-     * created with the given name, starting at midnight and executing every interval seconds until
-     * forever.
-     * </p>
-     *
-     * @param jobName  the job name
-     * @param interval the interval (in seconds)
-     * @return a Job to run AutoPilotJob starting at midnight today at every interval seconds
-     * @throws IllegalArgumentException if jobName is null or an empty (trimmed) string or interval <=
-     *                                  0
-     */
-    public static Job createJob(String jobName, int interval) {
-        // Check arguments.
-        if (null == jobName) {
-            throw new IllegalArgumentException("jobName cannot be null");
-        }
-        if (jobName.trim().length() < 1) {
-            throw new IllegalArgumentException("jobName cannot be empty");
-        }
-        if (interval < 1) {
-            throw new IllegalArgumentException("interval cannot be 0 or negative:" + interval);
-        }
-
-        GregorianCalendar start = new GregorianCalendar();
-        start.set(Calendar.HOUR_OF_DAY, 0);
-        start.set(Calendar.MINUTE, 0);
-        start.set(Calendar.SECOND, 0);
-        start.set(Calendar.MILLISECOND, 0);
-        return new Job(jobName, start, null, interval, Calendar.SECOND,
-                Scheduler.JOB_TYPE_JAVA_CLASS, AutoPilotJob.class.getName());
-    }
-
-    /**
-     * <p>
-     * Schedules a job using the static scheduler. The scheduler's Timer will prevent application
-     * from exiting until it's closed. This will lazily instantiate the Scheduler (if one hasn't
-     * been instantiated), then it'll add the AutoPilotJob to the scheduler and start it. The
-     * scheduler instantiation is synchronized so that multiple thread trying to schedule jobs will
-     * only instantiate one scheduler instance.<br>
-     * Cause job name is unique in the scheduler, the job with the same name will be replaced with
-     * auto pilot job if there exists the job with the same name. Otherwise the auto pilot job will
-     * be added.
-     * </p>
-     *
-     * @param jobName  the job name
-     * @param interval the interval in seconds
-     * @throws IllegalArgumentException if string parameters are null or empty (trimmed) string, or
-     *                                  interval is non-positive.
-     * @throws ConfigurationException   if an error occurs configuring the Scheduler
-     */
-    public static void schedule(String fileName, String jobName, int interval, String watchFileName)
-            throws ConfigurationException {
-        // Check arguments.
-        if (null == fileName) {
-            throw new IllegalArgumentException("fileName cannot be null");
-        }
-        if (fileName.trim().length() < 1) {
-            throw new IllegalArgumentException("fileName cannot be empty");
-        }
-        if (null == jobName) {
-            throw new IllegalArgumentException("jobName cannot be null");
-        }
-        if (jobName.trim().length() < 1) {
-            throw new IllegalArgumentException("jobName cannot be empty");
-        }
-        if (interval < 1) {
-            throw new IllegalArgumentException("interval cannot be 0 or negative:" + interval);
-        }
-
-        synchronized (AutoPilotJob.class) {
-            if (scheduler == null) {
-                scheduler = new Scheduler(fileName);
-            }
-            if (stopper == null) {
-                stopper = new Thread(new AutoPilotJobStopper(watchFileName));
-            }
-        }
-
-        // Add or replace the job with jobName.
-        synchronized (scheduler) {
-            try {
-                // Find old job with same name.
-                Job oldJob = findJob(jobName);
-
-                // Create new job if no old job with same name. Replace with new job otherwise.
-                Job newJob = createJob(jobName, interval);
-                if (null == oldJob) {
-                    scheduler.addJob(newJob);
-                } else {
-                    scheduler.replaceJob(oldJob, newJob);
-                }
-            } catch (JobActionException e) {
-                log.error("fail to add job '" + jobName
-                        + "' cause of job action exception \n" + LogMessage.getExceptionStackTrace(e));
-                throw new ConfigurationException("fail to add job '" + jobName + "' cause of job action exception", e);
-            } catch (RuntimeException e) {
-                log.error("fail to add job '" + jobName
-                        + "' cause of run time exception \n" + LogMessage.getExceptionStackTrace(e));
-                throw new ConfigurationException("fail to add job '" + jobName + "' cause of run time exception", e);
-            }
-
-            if (!scheduler.isSchedulerRunning()) {
-                stopper.start();
-                scheduler.start();
-            }
-        }
-    }
-
-    /**
-     * <p>
-     * Find job with the specified name.
-     * </p>
-     *
-     * @param jobName the job name.
-     * @return the job with the specified name.
-     */
-    private static Job findJob(String jobName) {
-        Job oldJob = null;
-        for (Iterator it = scheduler.getJobList().iterator(); it.hasNext(); ) {
-            Job job = (Job) it.next();
-            if (job.getName().equals(jobName)) {
-                oldJob = job;
-                break;
-            }
-        }
-        return oldJob;
-    }
-
-    /**
-     * <p>
-     * Returns the internal scheduler instance (could be null).
-     * </p>
-     *
-     * @return the internal scheduler instance (could be null if schedule hasn't been called yet)
-     */
-    public static Scheduler getScheduler() {
-        return scheduler;
-    }
-
-    /**
-     * <p>A task for polling the file system for presence of guard file and stopping the scheduler in case the file is
-     * found thus causing the Auto Pilot process to exit.</p>
-     *
-     * @author isv
-     * @version 1.0
-     */
-    private static class AutoPilotJobStopper implements Runnable {
-        /**
-         * <p>A <code>File</code> referencing the file on the local file system which presence indicates that the job
-         * has to stop and quit.</p>
-         *
-         * @since 1.0.1
-         */
-        private File guardFile = null;
-
-        /**
-         * <p>The log used by this class for logging errors and debug information.</p>
-         */
-        private final Logger log = LoggerFactory.getLogger(AutoPilotJobStopper.class);
-
-        /**
-         * <p>Constructs new <code>AutoPilotJobStopper</code> instance.</p>
-         *
-         * @throws ConfigurationException if an unexpected error occurs.
-         */
-        private AutoPilotJobStopper(String watchFileName) throws ConfigurationException {
-            this.guardFile = new File(watchFileName);
-        }
-
-        /**
-         * <p>Polls the file system at intervals of 2 seconds for presence of guard file. If file is present then stops
-         * the scheduler causing the Auto Pilot process to exit.</p>
-         *
-         * @see Thread#run()
-         */
-        public void run() {
-            // Check if the job has to stop and quit
-            while (!guardFile.exists()) {
-                try {
-                    Thread.sleep(2000);
-                } catch (InterruptedException e) {
-                    // Ignore
-                }
-            }
-            log.info("Got a signal to stop the entire Auto Pilot process by presence of file "
-                    + this.guardFile);
-            scheduler.stop();
-            log.info("Called the scheduler to stop");
         }
     }
 }
