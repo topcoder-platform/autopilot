@@ -289,7 +289,7 @@ public class AutoPilotUtility {
     private static void dealPoll(CommandLineUtility clu, ApplicationContext context, ScheduledExecutorService ses)
             throws ConfigurationException {
         // Use 60 seconds if interval not specified.
-        int interval = 60;
+        int interval = 1;
         String poll = clu.getSwitch("poll").getValue();
         if (null != poll) {
             interval = Integer.parseInt(poll);
@@ -297,7 +297,7 @@ public class AutoPilotUtility {
         ses.scheduleAtFixedRate(() -> {
             AutoPilotResult[] result = context.getBean(AutoPilotJob.class).execute();
             printResult(result);
-        }, 0, interval, TimeUnit.SECONDS);
+        }, 0, interval, TimeUnit.MINUTES);
     }
 
     /**

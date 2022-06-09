@@ -9,8 +9,8 @@ This command line provides 2 functionalites:
         two kinds of run-mode): It is an error if both poll/projects are
         specified or none are specified.
 
-    A) Poll-mode - poll is used to define the interval in seconds, if interval
-        is not specified, a default of 60 seconds is used. The autopilot job will
+    A) Poll-mode - poll is used to define the interval in minutes, if interval
+        is not specified, a default of 1 minute is used. The autopilot job will
         be executed every this interval starting from midnight.
 
     B) - project can be specified to process projects with the given ids. The

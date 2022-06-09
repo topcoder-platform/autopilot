@@ -1,9 +1,9 @@
-database.server=c-informix
+database.server=tc-informix
 database.port=2021
 database.username=informix
 database.password=1nf0rm1x
 database.INFORMIXSERVER=informixoltp_tcp
-dataware.server=c-informix
+dataware.server=tc-informix
 dataware.port=2021
 dataware.username=informix
 dataware.password=1nf0rm1x
@@ -33,3 +33,13 @@ svn.password=password
 svn.mkdir.commit.message=Online Review auto-commit
 svn.temp.files.basedir=/root/temp_files/temp_svn
 svn.authz.file.url=https://coder.topcoder.com/tcs/configuration/trunk/svn-permissions.txt
+
+topcoder_event_bus_topic=notifications.autopilot.events
+topcoder_event_bus_originator=auto_pilot
+topcoder_event_bus_url=https://api.topcoder-dev.com/v5/bus/events
+topcoder_event_bus_proxy_url=https://auth0proxy.topcoder-dev.com/token
+topcoder_event_bus_client_id=g9hv5ahuIcwKKk0hPngSfmJ6Wr09kD3o
+topcoder_event_bus_client_secret=rZzHkpJmMmv91Bx8mOFXeN0OpxLmr9sSAHeHQViCWl2oRFxVb2K4oaKcz1uXbvsK
+topcoder_event_bus_auth_audience=https://m2m.topcoder-dev.com/
+topcoder_event_bus_auth_domain=topcoder-newauth.auth0.com
+topcoder_event_bus_expiration_time=1440

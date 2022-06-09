@@ -137,7 +137,7 @@ public class KafkaMessageProducer {
 			prb = new PropertyResourceBundle(new FileInputStream(file));
 		} else {
 			log.warn("Will use file in classpath");
-			prb = new PropertyResourceBundle(getClass().getResourceAsStream(CONFIG_FILE_PATH));
+			prb = new PropertyResourceBundle(getClass().getClassLoader().getResourceAsStream(CONFIG_FILE_PATH));
 		}
 		return prb;
 	}
