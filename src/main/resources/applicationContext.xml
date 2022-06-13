@@ -15,7 +15,9 @@
 
     <context:annotation-config/>
     <context:property-placeholder location="classpath:applicationConfig.properties"/>
-    <context:component-scan base-package="com.topcoder.onlinereview.component" />
+    <context:component-scan base-package="com.topcoder.onlinereview.component" >
+        <context:exclude-filter type="assignable" expression="com.topcoder.onlinereview.component.fileupload.LocalFileUpload"/>
+    </context:component-scan>
 
     <import resource="phaseHandlers.xml" />
     <import resource="searchBundle.xml" />

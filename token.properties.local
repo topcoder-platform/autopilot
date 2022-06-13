@@ -19,8 +19,6 @@ notificationEmailFromAddress=servicetopcodersoftware.com
 
 topcoder_api_base_url=http://api.topcoder-dev.com/v2/develop/challenges
 amazon_sns_arn=arn:aws:sns:us-east-1:766830814403:community-challenge-create
-localFileUploadDir=/nfs_shares/tcssubmissions
-localStudioFileUploadDir=/nfs_shares/studiofiles/submissions
 distributionScriptsBase=/root/web/conf/distribution_scripts/unix
 
 SSO_COOKIE_KEY=tcsso
