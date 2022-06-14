@@ -56,12 +56,12 @@ workspace_attach: &workspace_attach
     at: ./   
 
 restore_cache_settings_for_build: &restore_cache_settings_for_build
-    key: autopilot-{{ checksum "~/project/pom.xml" }}
+    key: tc-autopilot-{{ checksum "~/project/pom.xml" }}
 
 save_cache_settings: &save_cache_settings
     paths:
       - ~/.m2
-    key: autopilot-{{ checksum "~/project/pom.xml" }}
+    key: tc-autopilot-{{ checksum "~/project/pom.xml" }}
 
 build_steps: &build_steps
     # Initialization.
@@ -80,7 +80,7 @@ build_steps: &build_steps
         name: "Buidling OR file"
         command: |
           source awsenvconf
-          ./buildproperties.sh -e $BUILD_ENV -k autopilot
+          ./buildproperties.sh -e $BUILD_ENV -k autopilotv1
           # mvn dependency:go-offline
           mvn clean package
     - save_cache: *save_cache_settings         
@@ -116,7 +116,7 @@ jobs:
       LOGICAL_ENV: "dev"
       COMPONENT_BRANCH: "dev"
       DEPLOY_ENV: "DEV"
-      APPNAME: "autopilot"
+      APPNAME: "tc-autopilot"
     steps: *build_steps
 
   "build-prod":
@@ -126,7 +126,7 @@ jobs:
       LOGICAL_ENV: "prod" 
       DEPLOY_ENV: "PROD"      
       COMPONENT_BRANCH: "master"      
-      APPNAME: "autopilot"                 
+      APPNAME: "tc-autopilot"                 
     steps: *build_steps 
 
   deployDev:
@@ -134,7 +134,7 @@ jobs:
     environment:
       DEPLOY_ENV: "DEV"
       LOGICAL_ENV: "dev"
-      APPNAME: "autopilot"
+      APPNAME: "tc-autopilot"
     steps: *deploy_steps
 
   deployProd:
@@ -142,7 +142,7 @@ jobs:
     environment:
       DEPLOY_ENV: "PROD"
       LOGICAL_ENV: "prod"
-      APPNAME: "autopilot"
+      APPNAME: "tc-autopilot"
     steps: *deploy_steps
 
 workflows:
