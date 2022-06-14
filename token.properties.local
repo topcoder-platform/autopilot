@@ -17,20 +17,11 @@ emailengine_smtp_user=do_not_reply@topcoder.com
 emailengine_smtp_password=top_coder
 notificationEmailFromAddress=servicetopcodersoftware.com
 
-topcoder_api_base_url=http://api.topcoder-dev.com/v2/develop/challenges
-amazon_sns_arn=arn:aws:sns:us-east-1:766830814403:community-challenge-create
 distributionScriptsBase=/root/web/conf/distribution_scripts/unix
 
 SSO_COOKIE_KEY=tcsso
 SSO_HASH_SECRET=Yb2oMAtUoJyl6LvHEnRYF1Q5u5ags7DN6PXgDPZAU9Ku68k7wTJHIDaIT0DjXYubam
 SSO_DOMAIN=topcoder.com
-
-svn.root=https://coder.topcoder.com/tcs
-svn.username=OnlineReview
-svn.password=password
-svn.mkdir.commit.message=Online Review auto-commit
-svn.temp.files.basedir=/root/temp_files/temp_svn
-svn.authz.file.url=https://coder.topcoder.com/tcs/configuration/trunk/svn-permissions.txt
 
 topcoder_event_bus_topic=notifications.autopilot.events
 topcoder_event_bus_originator=auto_pilot
