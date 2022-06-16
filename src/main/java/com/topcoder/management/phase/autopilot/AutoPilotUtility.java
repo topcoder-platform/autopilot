@@ -294,7 +294,7 @@ public class AutoPilotUtility {
         if (null != poll) {
             interval = Integer.parseInt(poll);
         }
-        ses.scheduleAtFixedRate(() -> {
+        ses.scheduleWithFixedDelay(() -> {
             AutoPilotResult[] result = context.getBean(AutoPilotJob.class).execute();
             printResult(result);
         }, 0, interval, TimeUnit.MINUTES);
