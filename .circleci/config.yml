@@ -125,7 +125,7 @@ jobs:
       BUILD_ENV: "PROD"
       LOGICAL_ENV: "prod" 
       DEPLOY_ENV: "PROD"      
-      COMPONENT_BRANCH: "master"      
+      COMPONENT_BRANCH: "master-AP"      
       APPNAME: "tc-autopilot"                 
     steps: *build_steps 
 
