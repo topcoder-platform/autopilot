@@ -31,5 +31,5 @@ topcoder_event_bus_proxy_url=https://auth0proxy.topcoder-dev.com/token
 topcoder_event_bus_client_id=5fctfjaLJHdvM04kSrCcC8yn0I4t1JTd
 topcoder_event_bus_client_secret=GhvDENIrYXo-d8xQ10fxm9k7XSVg491vlpvolXyWNBmeBdhsA5BAq2mH4cAAYS0x
 topcoder_event_bus_auth_audience=https://m2m.topcoder-dev.com/
-topcoder_event_bus_auth_domain=topcoder-newauth.auth0.com
+topcoder_event_bus_auth_domain=topcoder-dev.auth0.com
 topcoder_event_bus_expiration_time=1440
