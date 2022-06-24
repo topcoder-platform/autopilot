@@ -180,6 +180,10 @@ public class ActiveAutoPilotSource implements AutoPilotSource {
         	log.error("Fail to get projects from projectManager.\n" + LogMessage.getExceptionStackTrace(e));
             throw new AutoPilotSourceException(
                 "fail to search projects cause of persistence exception", e);
+        } catch (Exception e) {
+        	log.error("Fail to get projects from projectManager.\n" + LogMessage.getExceptionStackTrace(e));
+
+            return ZERO_LONG_ARRAY;
         }
     }
 
