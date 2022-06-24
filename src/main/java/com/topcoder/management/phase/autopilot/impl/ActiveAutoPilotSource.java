@@ -7,7 +7,6 @@ package com.topcoder.management.phase.autopilot.impl;
 import com.topcoder.management.phase.autopilot.AutoPilotSource;
 import com.topcoder.management.phase.autopilot.AutoPilotSourceException;
 import com.topcoder.management.phase.autopilot.logging.LogMessage;
-import com.topcoder.onlinereview.component.project.management.PersistenceException;
 import com.topcoder.onlinereview.component.project.management.Project;
 import com.topcoder.onlinereview.component.project.management.ProjectFilterUtility;
 import com.topcoder.onlinereview.component.project.management.ProjectManager;
@@ -176,10 +175,9 @@ public class ActiveAutoPilotSource implements AutoPilotSource {
             Project[] proj = projectManager.searchProjects(f);
 
             return processProject(proj);
-        } catch (PersistenceException e) {
+        } catch (Exception e) {
         	log.error("Fail to get projects from projectManager.\n" + LogMessage.getExceptionStackTrace(e));
-            throw new AutoPilotSourceException(
-                "fail to search projects cause of persistence exception", e);
+            return ZERO_LONG_ARRAY;
         }
     }
 
