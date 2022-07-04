@@ -33,3 +33,6 @@ topcoder_event_bus_client_secret=GhvDENIrYXo-d8xQ10fxm9k7XSVg491vlpvolXyWNBmeBdh
 topcoder_event_bus_auth_audience=https://m2m.topcoder-dev.com/
 topcoder_event_bus_auth_domain=topcoder-dev.auth0.com
 topcoder_event_bus_expiration_time=1440
+
+challenge_base_url=https\\://challenges.topcoder-dev.com/projects
+challenge_v5_base_url=https://api.topcoder-dev.com/v5
