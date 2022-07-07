@@ -17,7 +17,7 @@ emailengine_smtp_user=do_not_reply@topcoder.com
 emailengine_smtp_password=top_coder
 notificationEmailFromAddress=servicetopcodersoftware.com
 
-exttemplatesdir=templates
+exttemplatesdir=target/templates
 distributionScriptsBase=/root/web/conf/distribution_scripts/unix
 
 SSO_COOKIE_KEY=tcsso
