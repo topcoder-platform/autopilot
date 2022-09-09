@@ -175,7 +175,7 @@ public class AutoPilot {
                         log.info(
                                 new LogMessage(null, operator, "Stopped in synchronized for projectId=" + longProjectId)
                                         .toString());
-                        continue;
+                        return;
                     } else {
                         processingProjectIds.add(longProjectId);
                     }
