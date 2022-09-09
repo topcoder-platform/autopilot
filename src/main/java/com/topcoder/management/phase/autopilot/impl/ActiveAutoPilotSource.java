@@ -194,7 +194,7 @@ public class ActiveAutoPilotSource implements AutoPilotSource {
      * @return A non-null filter representing the search criteria
      */
     protected Filter buildFilter() {
-        Filter stat = ProjectFilterUtility.buildStatusIdEqualFilter(1);
+        Filter stat = ProjectFilterUtility.buildStatusNameEqualFilter(getActiveStatusName());
         Filter extProp = ProjectFilterUtility.buildProjectPropertyEqualFilter(
             getExtPropAutoPilotSwitch(), getExtPropAutoPilotSwitchValue());
         return ProjectFilterUtility.buildAndFilter(stat, extProp);
