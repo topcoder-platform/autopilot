@@ -12,6 +12,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * <p>
@@ -49,6 +52,8 @@ public class AutoPilot {
      * {@link #advanceProjects(long[], String)}.
      */
     private static final AutoPilotResult[] ZERO_AUTO_PILOT_RESULT_ARRAY = new AutoPilotResult[0];
+
+    private static final ExecutorService THREAD_POOL = Executors.newFixedThreadPool(20);
 
     /**
      * <p>
@@ -158,37 +163,48 @@ public class AutoPilot {
 
         // Map key is Long (project id). Map value is AutoPilotResult instance.
         Map resMap = new HashMap();
+        CountDownLatch latch = new CountDownLatch(projectId.length);
         for (int i = 0; i < projectId.length; i++) {
-            AutoPilotResult result = null;
-            Long longProjectId = new Long(projectId[i]);
+            THREAD_POOL.execute(() -> {
+                AutoPilotResult result = null;
+                Long longProjectId = new Long(projectId[i]);
 
-            // Check if the project is processing by another thread
-            synchronized (processingProjectIds) {
-                if (processingProjectIds.contains(longProjectId)) {
-                    log.info(new LogMessage(null, operator, "Stopped in synchronized for projectId=" + longProjectId).toString());
-                    continue;
-                } else {
-                    processingProjectIds.add(longProjectId);
-                }
-            }
-
-            try {
-                result = advanceProject(projectId[i], operator);
-                // store/aggregate into Map
-                if (resMap.containsKey(longProjectId)) {
-                    // Aggregate the result only if at least one of counters > 0.
-                    if (result.getPhaseEndedCount() > 0 || result.getPhaseStartedCount() > 0) {
-                        ((AutoPilotResult) resMap.get(longProjectId)).aggregate(result);
-                    }
-                } else {
-                    resMap.put(longProjectId, result);
-                }
-            } finally {
-                // Make sure this project can be processed by next thread
+                // Check if the project is processing by another thread
                 synchronized (processingProjectIds) {
-                    processingProjectIds.remove(longProjectId);
+                    if (processingProjectIds.contains(longProjectId)) {
+                        log.info(
+                                new LogMessage(null, operator, "Stopped in synchronized for projectId=" + longProjectId)
+                                        .toString());
+                        continue;
+                    } else {
+                        processingProjectIds.add(longProjectId);
+                    }
                 }
-            }
+
+                try {
+                    result = advanceProject(projectId[i], operator);
+                    // store/aggregate into Map
+                    if (resMap.containsKey(longProjectId)) {
+                        // Aggregate the result only if at least one of counters > 0.
+                        if (result.getPhaseEndedCount() > 0 || result.getPhaseStartedCount() > 0) {
+                            ((AutoPilotResult) resMap.get(longProjectId)).aggregate(result);
+                        }
+                    } else {
+                        resMap.put(longProjectId, result);
+                    }
+                } finally {
+                    // Make sure this project can be processed by next thread
+                    synchronized (processingProjectIds) {
+                        processingProjectIds.remove(longProjectId);
+                        latch.countDown();
+                    }
+                }
+            });
+        }
+        try {
+            latch.await();
+        } catch (InterruptedException E) {
+
         }
 
         return (AutoPilotResult[]) resMap.values().toArray(new AutoPilotResult[resMap.size()]);
