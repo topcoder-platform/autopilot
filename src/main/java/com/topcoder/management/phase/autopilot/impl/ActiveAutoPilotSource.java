@@ -70,7 +70,7 @@ public class ActiveAutoPilotSource implements AutoPilotSource {
         "SELECT DISTINCT project.project_id " +
         "FROM project " +
         "LEFT JOIN project_info ON project.project_id = project_info.project_id " +
-        "LEFT JOIN project_info_type_lu ON project_info.project_info_type_id = project_info_type_lu.project_info_type_id" +
+        "LEFT JOIN project_info_type_lu ON project_info.project_info_type_id = project_info_type_lu.project_info_type_id " +
         "WHERE project.project_status_id=1 and project_info_type_lu.name = 'Autopilot Option' and project_info.value = 'On'";
     
     /**
