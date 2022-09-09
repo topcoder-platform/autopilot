@@ -164,10 +164,10 @@ public class AutoPilot {
         // Map key is Long (project id). Map value is AutoPilotResult instance.
         Map resMap = new HashMap();
         CountDownLatch latch = new CountDownLatch(projectId.length);
-        for (int i = 0; i < projectId.length; i++) {
+        for (long id : projectId) {
             THREAD_POOL.execute(() -> {
                 AutoPilotResult result = null;
-                Long longProjectId = new Long(projectId[i]);
+                Long longProjectId = new Long(id);
 
                 // Check if the project is processing by another thread
                 synchronized (processingProjectIds) {
@@ -182,7 +182,7 @@ public class AutoPilot {
                 }
 
                 try {
-                    result = advanceProject(projectId[i], operator);
+                    result = advanceProject(longProjectId, operator);
                     // store/aggregate into Map
                     if (resMap.containsKey(longProjectId)) {
                         // Aggregate the result only if at least one of counters > 0.
