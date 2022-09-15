@@ -296,7 +296,8 @@ public class AutoPilotUtility {
         }
         ses.scheduleWithFixedDelay(() -> {
             AutoPilotResult[] result = context.getBean(AutoPilotJob.class).execute();
-            printResult(result);
+            // printResult(result);
+            log.info(String.format("Processed %d projects", result.length));
         }, 0, interval, TimeUnit.MINUTES);
     }
 
