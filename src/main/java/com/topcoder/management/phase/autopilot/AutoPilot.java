@@ -128,6 +128,7 @@ public class AutoPilot {
         }
 
         long[] projIds = autoPilotSource.getProjectIds();
+        log.info(String.format("Found %d active projects", projIds.length));
         return advanceProjects(projIds, operator);
     }
 
