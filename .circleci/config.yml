@@ -114,7 +114,7 @@ jobs:
     environment:
       BUILD_ENV: "DEV"
       LOGICAL_ENV: "dev"
-      COMPONENT_BRANCH: "dev"
+      COMPONENT_BRANCH: "PLAT-2032"
       DEPLOY_ENV: "DEV"
       APPNAME: "tc-autopilot"
     steps: *build_steps
