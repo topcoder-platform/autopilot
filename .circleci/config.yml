@@ -155,6 +155,7 @@ workflows:
             branches:
               only:
                 - dev-maven
+                - PLAT-2032
 
       - build-prod:
           context : org-global      
@@ -166,6 +167,7 @@ workflows:
           context : org-global
           requires:
             - build-dev
+            - PLAT-2032
           filters: 
             branches:
               only:
