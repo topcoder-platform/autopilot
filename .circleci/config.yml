@@ -167,12 +167,10 @@ workflows:
           context : org-global
           requires:
             - build-dev
-            - PLAT-2032
           filters: 
             branches:
               only:
                 - dev-maven
-                - PLAT-2032
 
       - deployProd:
           context : org-global
