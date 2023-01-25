@@ -170,6 +170,7 @@ workflows:
             branches:
               only:
                 - dev-maven
+                - PLAT-2032
 
       - deployProd:
           context : org-global
