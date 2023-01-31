@@ -21,44 +21,6 @@
 
     <import resource="phaseHandlers.xml" />
     <import resource="searchBundle.xml" />
-    <bean id="dataSource" class="org.apache.commons.dbcp2.BasicDataSource" destroy-method="close">
-        <property name="driverClassName" value="com.informix.jdbc.IfxDriver" />
-        <property name="url" value="jdbc:informix-sqli://@database.server@:@database.port@/tcs_catalog:INFORMIXSERVER=@database.INFORMIXSERVER@;IFX_USE_STRENC=true" />
-        <property name="username" value="@database.username@"/>
-        <property name="password" value="@database.password@"/>
-    </bean>
-    <bean id="oltpDataSource" class="org.apache.commons.dbcp2.BasicDataSource" destroy-method="close">
-        <property name="driverClassName" value="com.informix.jdbc.IfxDriver" />
-        <property name="url" value="jdbc:informix-sqli://@database.server@:@database.port@/informixoltp:INFORMIXSERVER=@database.INFORMIXSERVER@;IFX_USE_STRENC=true" />
-        <property name="username" value="@database.username@"/>
-        <property name="password" value="@database.password@"/>
-    </bean>
-    <bean id="tcsDwDataSource" class="org.apache.commons.dbcp2.BasicDataSource" destroy-method="close">
-        <property name="driverClassName" value="com.informix.jdbc.IfxDriver" />
-        <property name="url" value="jdbc:informix-sqli://@dataware.server@:@dataware.port@/tcs_dw:INFORMIXSERVER=@dataware.INFORMIXSERVER@;IFX_USE_STRENC=true" />
-        <property name="username" value="@dataware.username@"/>
-        <property name="password" value="@dataware.password@"/>
-    </bean>
-    <bean id="commonDataSource" class="org.apache.commons.dbcp2.BasicDataSource" destroy-method="close">
-        <property name="driverClassName" value="com.informix.jdbc.IfxDriver" />
-        <property name="url" value="jdbc:informix-sqli://@database.server@:@database.port@/common_oltp:INFORMIXSERVER=@database.INFORMIXSERVER@;IFX_USE_STRENC=true" />
-        <property name="username" value="@database.username@"/>
-        <property name="password" value="@database.password@"/>
-    </bean>
-
-    <bean id="tcsJdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
-        <property name="dataSource" ref="dataSource"/>
-    </bean>
-    <bean id="tcsDwJdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
-        <property name="dataSource" ref="tcsDwDataSource"/>
-    </bean>
-
-    <bean id="oltpJdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
-        <property name="dataSource" ref="oltpDataSource"/>
-    </bean>
-    <bean id="commonJdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
-        <property name="dataSource" ref="commonDataSource"/>
-    </bean>
 
     <bean id="autoPilotSource" class="com.topcoder.management.phase.autopilot.impl.ActiveAutoPilotSource" >
         <property name="projectManager" ref="projectManager" />
