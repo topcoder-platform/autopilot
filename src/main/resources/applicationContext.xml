@@ -20,7 +20,6 @@
     </context:component-scan>
 
     <import resource="phaseHandlers.xml" />
-    <import resource="searchBundle.xml" />
 
     <bean id="autoPilotSource" class="com.topcoder.management.phase.autopilot.impl.ActiveAutoPilotSource" >
         <property name="projectManager" ref="projectManager" />
