@@ -53,7 +53,7 @@ public class AutoPilot {
      */
     private static final AutoPilotResult[] ZERO_AUTO_PILOT_RESULT_ARRAY = new AutoPilotResult[0];
 
-    private static final ExecutorService THREAD_POOL = Executors.newFixedThreadPool(20);
+    private static final ExecutorService THREAD_POOL = Executors.newFixedThreadPool(10);
 
     /**
      * <p>
