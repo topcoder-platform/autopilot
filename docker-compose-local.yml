@@ -1,0 +1,10 @@
+version: '3'
+services:
+  tc-autopilot:
+    image: tc-autopilot:latest
+    build:
+      context: .
+networks:
+  default:
+    name: tc-online-review_default
+    external: true

@@ -1,10 +1,39 @@
-version: '3'
+version: "3"
 services:
+  tc-or-grpc-server:
+    image: tc-or-grpc-server:latest
+    container_name: tc-or-grpc-server
+    hostname: tc-or-grpc-server
+    restart: always
+    ports:
+      - "0:9099"
+    logging:
+      driver: awslogs
+      options:
+        awslogs-group: /aws/ecs/tc-autopilot
+        awslogs-region: us-east-1
+        awslogs-stream-prefix: tc-or-grpc-server
+    env_file:
+      - api.env
   tc-autopilot:
     image: tc-autopilot:latest
+    container_name: tc-autopilot
     build:
       context: .
-networks:
-  default:
-    name: tc-online-review_default
-    external: true
+      dockerfile: ECSDockerfile
+    restart: always
+    ports:
+      - "0:8080"
+    links:
+      - tc-or-grpc-server
+    environment:
+      - grpc_client_or_address=tc-or-grpc-server
+      - grpc_client_or_port=9099
+    depends_on:
+      - tc-or-grpc-server
+    logging:
+      driver: awslogs
+      options:
+        awslogs-group: /aws/ecs/tc-autopilot
+        awslogs-region: us-east-1
+        awslogs-stream-prefix: tc-autopilot
