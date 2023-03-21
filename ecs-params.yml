@@ -6,4 +6,4 @@ task_definition:
       mem_limit: 1G
     tc-autopilot:
       cpu_shares: 300
-      mem_limit: 6GB
+      mem_limit: 1GB
