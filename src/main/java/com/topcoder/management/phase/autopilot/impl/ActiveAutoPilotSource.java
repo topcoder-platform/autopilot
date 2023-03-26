@@ -66,13 +66,6 @@ public class ActiveAutoPilotSource implements AutoPilotSource {
      */
     private static final Logger log = LoggerFactory.getLogger(ActiveAutoPilotSource.class);
 
-    private static final String QUERY_SEARCH_PROJECTS =
-        "SELECT DISTINCT project.project_id " +
-        "FROM project " +
-        "LEFT JOIN project_info ON project.project_id = project_info.project_id " +
-        "LEFT JOIN project_info_type_lu ON project_info.project_info_type_id = project_info_type_lu.project_info_type_id " +
-        "WHERE project.project_status_id=1 and project_info_type_lu.name = 'Autopilot Option' and project_info.value = 'On'";
-    
     /**
      * <p>
      * Represents the ProjectManager instance that is used to search project based on its status and
@@ -178,7 +171,7 @@ public class ActiveAutoPilotSource implements AutoPilotSource {
      */
     public long[] getProjectIds() throws AutoPilotSourceException {
         try {
-            return projectManager.searchProjectsForIds(QUERY_SEARCH_PROJECTS);
+            return projectManager.searchProjectsForIds();
         } catch (Exception e) {
         	log.error("Fail to get projects from projectManager.\n" + LogMessage.getExceptionStackTrace(e));
             return ZERO_LONG_ARRAY;

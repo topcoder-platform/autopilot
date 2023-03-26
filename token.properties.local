@@ -17,7 +17,7 @@ emailengine_smtp_user=do_not_reply@topcoder.com
 emailengine_smtp_password=top_coder
 notificationEmailFromAddress=servicetopcodersoftware.com
 
-exttemplatesdir=target/templates
+exttemplatesdir=templates
 distributionScriptsBase=/root/web/conf/distribution_scripts/unix
 
 SSO_COOKIE_KEY=tcsso
@@ -36,3 +36,8 @@ topcoder_event_bus_expiration_time=1440
 
 challenge_base_url=https\\://challenges.topcoder-dev.com/projects
 challenge_v5_base_url=https://api.topcoder-dev.com/v5
+
+grpc_client_or_address=host.docker.internal
+grpc_client_or_port=9099
+grpc_client_orsync_address=host.docker.internal
+grpc_client_orsync_port=9098

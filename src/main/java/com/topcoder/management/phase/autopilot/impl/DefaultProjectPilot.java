@@ -8,6 +8,7 @@ import com.topcoder.kafka.messaging.KafkaMessageProducer;
 import com.topcoder.management.phase.autopilot.AutoPilotResult;
 import com.topcoder.management.phase.autopilot.PhaseOperationException;
 import com.topcoder.management.phase.autopilot.ProjectPilot;
+import com.topcoder.onlinereview.component.grpcclient.GrpcHelper;
 import com.topcoder.onlinereview.component.project.management.PersistenceException;
 import com.topcoder.onlinereview.component.project.management.ProjectManager;
 import com.topcoder.onlinereview.component.project.phase.Dependency;
@@ -22,8 +23,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.TimeZone;
 
@@ -111,6 +114,8 @@ public class DefaultProjectPilot implements ProjectPilot {
      */
     private String openStatusName;
 
+    private List<Long> lastPhases = Arrays.asList(4L, 6L, 7L, 8L, 9L, 10L, 11L, 18L);
+
     /**
      * <p>
      * Represents kafka message producer.
@@ -196,7 +201,7 @@ public class DefaultProjectPilot implements ProjectPilot {
         }
 
         // Get phases.
-        int countEnd = 0, countStart = 0;
+        int countEnd = 0, countStart = 0, countLasPhaseEnd = 0;
         Set set = new HashSet();
         Project proj;
         try {
@@ -213,8 +218,13 @@ public class DefaultProjectPilot implements ProjectPilot {
                     int[] cc = processPhase(phases[i], set, operator);
                     countEnd += cc[0];
                     countStart += cc[1];
+                    countLasPhaseEnd += cc[2];
                 }
             }
+            boolean statusHasChanged = countLasPhaseEnd > 0;
+            boolean phaseUpdated = countEnd > 0 || countStart > 0;
+            boolean submissionUpdated = countLasPhaseEnd > 0;
+            GrpcHelper.getSyncServiceRpc().autopilotSync(projectId, statusHasChanged, phaseUpdated, submissionUpdated);
         } catch (Exception e) {
             ByteArrayOutputStream s = new ByteArrayOutputStream();
             e.printStackTrace(new PrintStream(s));
@@ -246,10 +256,10 @@ public class DefaultProjectPilot implements ProjectPilot {
         throws PhaseOperationException {
         if (null == phase || processedPhase.contains(new Long(phase.getId()))) {
             // Should return new array cause we do not known if it is used to aggregate.
-            return new int[] {0, 0};
+            return new int[] {0, 0, 0};
         }
 
-        int[] count = {0, 0};
+        int[] count = {0, 0, 0};
 
         // Process its dependencies firstly.
         Dependency[] dd = phase.getAllDependencies();
@@ -258,6 +268,7 @@ public class DefaultProjectPilot implements ProjectPilot {
                 int[] tmp = processPhase(dd[i].getDependency(), processedPhase, operator);
                 count[0] += tmp[0];
                 count[1] += tmp[1];
+                count[2] += tmp[2];
             }
         }
 
@@ -265,6 +276,7 @@ public class DefaultProjectPilot implements ProjectPilot {
         int[] tmp = doPhaseOperation(phase, operator);
         count[0] += tmp[0];
         count[1] += tmp[1];
+        count[2] += tmp[2];
 
         processedPhase.add(new Long(phase.getId()));
 
@@ -285,10 +297,10 @@ public class DefaultProjectPilot implements ProjectPilot {
     protected int[] doPhaseOperation(Phase phase, String operator) throws PhaseOperationException {
         if (phase.getPhaseStatus() == null) {
             // Should return new array cause we do not known if it is used to aggregate.
-            return new int[] {0, 0};
+            return new int[] {0, 0, 0};
         }
 
-        int[] count = {0, 0};
+        int[] count = {0, 0, 0};
 
         // End if the phase is open and can end.
         try {
@@ -303,6 +315,9 @@ public class DefaultProjectPilot implements ProjectPilot {
 
                 phaseManager.end(phase, operator);
                 count[0]++;
+                if (lastPhases.contains(phase.getPhaseType().getId())) {
+                    count[2]++;
+                }
 
                 com.topcoder.onlinereview.component.project.management.Project project;
                 try {
