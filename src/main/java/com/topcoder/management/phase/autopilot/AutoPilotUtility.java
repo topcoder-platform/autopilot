@@ -298,7 +298,7 @@ public class AutoPilotUtility {
             AutoPilotResult[] result = context.getBean(AutoPilotJob.class).execute();
             // printResult(result);
             log.info(String.format("Processed %d projects", result.length));
-        }, 0, interval, TimeUnit.MINUTES);
+        }, 2L, interval, TimeUnit.MINUTES);
     }
 
     /**

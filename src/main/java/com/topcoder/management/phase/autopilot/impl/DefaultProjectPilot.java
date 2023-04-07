@@ -233,6 +233,8 @@ public class DefaultProjectPilot implements ProjectPilot {
                     + projectId
                     + ", stack trace : "
                     + s.toString());
+            log.info("Reactivating project " + projectId);
+            GrpcHelper.getProjectServiceRpc().reactivateProject(projectId);
         } finally {
             return new AutoPilotResult(projectId, countEnd, countStart);
         }
