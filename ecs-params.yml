@@ -2,8 +2,8 @@ version: 1
 task_definition:
   services:
     tc-or-grpc-server:
-      cpu_shares: 100
-      mem_limit: 1G
+      cpu_shares: 400
+      mem_limit: 2G
     tc-autopilot:
-      cpu_shares: 300
-      mem_limit: 6GB
+      cpu_shares: 600
+      mem_limit: 2GB
