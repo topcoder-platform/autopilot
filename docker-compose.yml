@@ -26,8 +26,6 @@ services:
     restart: always
     ports:
       - "8080:8080"
-    links:
-      - tc-or-grpc-server
     environment:
       - grpc_client_or_address=tc-or-grpc-server
       - grpc_client_or_port=9099
