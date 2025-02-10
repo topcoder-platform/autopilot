@@ -1,9 +1,13 @@
 version: 1
 task_definition:
+  task_execution_role: ${AWS_ECS_TASK_EXECUTION_ROLE}
+  task_size:
+    cpu_limit: ${AWS_ECS_FARGATE_CPU}
+    mem_limit: ${AWS_ECS_FARGATE_MEMORY}
   services:
     tc-or-grpc-server:
-      cpu_shares: 737
-      mem_limit: 3525M
+      cpu_shares: ${AWS_ECS_GRPC_CONTAINER_CPU}
+      mem_limit: ${AWS_ECS_GRPC_CONTAINER_MEMORY_RESERVATION}
     tc-autopilot:
-      cpu_shares: 1106
-      mem_limit: 3525M
+      cpu_shares: ${AWS_ECS_AUTOPILOT_CONTAINER_CPU}
+      mem_limit: ${AWS_ECS_AUTOPILOT_CONTAINER_MEMORY_RESERVATION}
