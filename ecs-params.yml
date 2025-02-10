@@ -1,6 +1,7 @@
 version: 1
 task_definition:
   task_execution_role: ${AWS_ECS_TASK_EXECUTION_ROLE}
+  ecs_network_mode: ${AWS_ECS_NETWORK_MODE}
   task_size:
     cpu_limit: ${AWS_ECS_FARGATE_CPU}
     mem_limit: ${AWS_ECS_FARGATE_MEMORY}
