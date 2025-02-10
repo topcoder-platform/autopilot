@@ -11,12 +11,4 @@ task_definition:
       mem_limit: ${AWS_ECS_GRPC_CONTAINER_MEMORY_RESERVATION}
     tc-autopilot:
       cpu_shares: ${AWS_ECS_AUTOPILOT_CONTAINER_CPU}
-      mem_limit: ${AWS_ECS_AUTOPILOT_CONTAINER_MEMORY_RESERVATION}
-run_params:
-  network_configuration:
-    awsvpc_configuration:
-      subnets:
-        - ${AWS_ECS_SUBNET_ID}
-      security_groups:
-        - ${AWS_ECS_SECURITY_GROUP}
-      assign_public_ip: ${ASSIGN_PUBLIC_IP}        
+      mem_limit: ${AWS_ECS_AUTOPILOT_CONTAINER_MEMORY_RESERVATION}    
