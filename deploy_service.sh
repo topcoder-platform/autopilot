@@ -8,4 +8,4 @@ docker tag $APP_IMAGE_NAME:$ECS_TAG $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaw
 ECS_TAG=$CIRCLE_BUILD_NUM
 docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECS_REPONAME:$ECS_TAG
 ecs-cli configure --region us-east-1 --cluster $AWS_ECS_CLUSTER
-ecs-cli compose --project-name "$AWS_ECS_SERVICE_NAME" service up --launch-type FARGATE
+ecs-cli compose --project-name "$AWS_ECS_SERVICE" service up --launch-type FARGATE
