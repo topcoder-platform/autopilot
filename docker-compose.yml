@@ -3,7 +3,6 @@ services:
   tc-or-grpc-server:
     image: tc-or-grpc-server:latest
     container_name: tc-or-grpc-server
-    hostname: tc-or-grpc-server
     restart: always
     read_only: true
     ports:
