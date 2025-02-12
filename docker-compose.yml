@@ -26,7 +26,7 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - grpc_client_or_address=tc-or-grpc-server
+      - grpc_client_or_address=localhost
       - grpc_client_or_port=9099
     depends_on:
       - tc-or-grpc-server
