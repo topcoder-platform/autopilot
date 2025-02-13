@@ -1,9 +1,22 @@
 version: 1
 task_definition:
+  task_execution_role: ${AWS_ECS_TASK_EXECUTION_ROLE}
+  ecs_network_mode: ${AWS_ECS_NETWORK_MODE}
+  task_size:
+    cpu_limit: ${AWS_ECS_FARGATE_CPU}
+    mem_limit: ${AWS_ECS_FARGATE_MEMORY}
   services:
     tc-or-grpc-server:
-      cpu_shares: 400
-      mem_limit: 2G
+      cpu_shares: ${AWS_ECS_GRPC_CONTAINER_CPU}
+      mem_limit: ${AWS_ECS_GRPC_CONTAINER_MEMORY_RESERVATION}
     tc-autopilot:
-      cpu_shares: 1000
-      mem_limit: 2GB
+      cpu_shares: ${AWS_ECS_AUTOPILOT_CONTAINER_CPU}
+      mem_limit: ${AWS_ECS_AUTOPILOT_CONTAINER_MEMORY_RESERVATION}
+run_params:
+  network_configuration:
+    awsvpc_configuration:
+      subnets:
+        - ${AWS_ECS_SUBNET_ID}
+      security_groups:
+        - ${AWS_ECS_SECURITY_GROUP}
+      assign_public_ip: ${ASSIGN_PUBLIC_IP}        

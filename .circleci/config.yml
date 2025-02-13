@@ -112,7 +112,8 @@ deploy_steps: &deploy_steps
       command: |
         source awsenvconf
         source buildenvvar
-        ./master_deploy.sh -d ECS -e $DEPLOY_ENV -m CLI -t latest -i ${APPNAME}
+        # ./master_deploy.sh -d ECS -e $DEPLOY_ENV -m CLI -t latest -i ${APPNAME}
+        ./deploy_service.sh
 
 jobs:
   # Build & Deploy against development backend
