@@ -18,12 +18,7 @@ install_dependency: &install_dependency
   name: Installation of build dependencies.
   command: |
     apt update
-    apt install -y  openssl git zip jq
-    mkdir ~/awscli
-    cd  ~/awscli
-    curl "https://s3.amazonaws.com/aws-cli/awscli-bundle-1.18.212.zip" -o "awscli-bundle.zip"
-    unzip awscli-bundle.zip
-    ./awscli-bundle/install -i /usr/local/aws -b /usr/local/bin/aws
+    apt install -y  openssl git zip jq curl python3 python-is-python3 awscli
     cd ~/project
 
 install_deploysuite: &install_deploysuite
