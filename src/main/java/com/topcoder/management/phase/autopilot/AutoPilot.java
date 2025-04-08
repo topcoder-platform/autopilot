@@ -8,10 +8,10 @@ import com.topcoder.management.phase.autopilot.logging.LogMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -163,7 +163,7 @@ public class AutoPilot {
         log.debug(new LogMessage(null, operator, "Checking active projects: " + getIdString(projectId)).toString());
 
         // Map key is Long (project id). Map value is AutoPilotResult instance.
-        Map resMap = new HashMap();
+        Map resMap = new ConcurrentHashMap();
         CountDownLatch latch = new CountDownLatch(projectId.length);
         for (long id : projectId) {
             THREAD_POOL.execute(() -> {
