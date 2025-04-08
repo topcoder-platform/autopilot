@@ -208,7 +208,7 @@ public class AutoPilot {
 
         }
 
-        return (AutoPilotResult[]) resMap.values().toArray(new AutoPilotResult[resMap.size()]);
+        return (AutoPilotResult[]) resMap.values().toArray(new AutoPilotResult[resMap.values().size()]);
     }
 
     /**
