@@ -295,9 +295,14 @@ public class AutoPilotUtility {
             interval = Integer.parseInt(poll);
         }
         ses.scheduleWithFixedDelay(() -> {
-            AutoPilotResult[] result = context.getBean(AutoPilotJob.class).execute();
-            // printResult(result);
-            log.info(String.format("Processed %d projects", result.length));
+            try{
+                AutoPilotResult[] result = context.getBean(AutoPilotJob.class).execute();
+                // printResult(result);
+                log.info(String.format("Processed %d projects", result.length));
+            } catch(Exception ex){
+                ex.printStackTrace();
+                log.error(ex.toString());
+            }
         }, 2L, interval, TimeUnit.MINUTES);
     }
 
