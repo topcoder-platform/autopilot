@@ -1,4 +1,4 @@
-FROM openjdk:8u332-jdk-slim
+FROM maven:3.9.9-amazoncorretto-23-debian
 
 ENV JAVA_OPTS="-Xms4G -Xmx4G -XX:MaxPermSize=512M -server"
 ENV TZ=America/Indiana/Indianapolis
